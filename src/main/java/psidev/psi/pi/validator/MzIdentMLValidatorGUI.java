@@ -63,7 +63,7 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
     /**
      * Constants.
      */
-    private static final Logger LOGGER      = LogManager.getLogger(MzIdentMLValidatorGUI.class);
+    private static final Logger LOGGER  = LogManager.getLogger(MzIdentMLValidatorGUI.class);
     private static final String NEW_LINE    = System.getProperty("line.separator");
     private static final String STR_FILE_SEPARATOR  = System.getProperty("file.separator");
     private static final String STR_RESOURCE_FOLDER = System.getProperty("user.dir") + STR_FILE_SEPARATOR + "resources" + STR_FILE_SEPARATOR;
