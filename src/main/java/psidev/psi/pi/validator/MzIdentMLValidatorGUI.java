@@ -782,8 +782,7 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
         // check if the file exists. If not, return the path
         if (!file.exists()) {
             MzIdentMLValidatorGUI.LOGGER.debug("ontologiesFile does not exist: " + ontologiesFile);
-            String filePath = Thread.currentThread().getContextClassLoader().getResource("ontologies.xml").getPath();
-            return Files.newInputStream(Paths.get(filePath));
+            return Thread.currentThread().getContextClassLoader().getResourceAsStream("ontologies.xml");
         }
 
         return Files.newInputStream(file.toPath());
@@ -822,8 +821,7 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
         // check if the file exists. If not, return the path
         if (!file.exists()) {
             MzIdentMLValidatorGUI.LOGGER.debug("ruleFilterFileName does not exist: " + ruleFilterFileName);
-            String filePath = Thread.currentThread().getContextClassLoader().getResource("ruleFilter_semantic.xml").getPath();
-            return Files.newInputStream(Paths.get(filePath));
+            return  Thread.currentThread().getContextClassLoader().getResourceAsStream("ruleFilter_semantic.xml");
         }
         return Files.newInputStream(file.toPath());
     }

@@ -3,6 +3,9 @@ package psidev.psi.pi.validator;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 /**
@@ -31,14 +34,16 @@ public class PropertyFile {
         if (this.props == null) {
             this.props = new Properties();
         }
-        if(!(new File(filepath).exists())){
-            filepath = Thread.currentThread().getContextClassLoader().getResource("validation.properties").getPath();
-        }
+        try{
 
-        try {
-            try (FileInputStream propFile = new FileInputStream(filepath)) {
-                this.props.load(propFile);
+            InputStream inputStream;
+            if(!(new File(filepath).exists())){
+                inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("validation.properties");
+            }else{
+                inputStream = Files.newInputStream(Paths.get(filepath));
             }
+            this.props.load(inputStream);
+
         } catch (IOException fnfexc) {
             fnfexc.printStackTrace(System.err);
         }

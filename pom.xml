@@ -148,60 +148,69 @@
 					</plugin>
 					<plugin>
 						<artifactId>maven-assembly-plugin</artifactId>
-						<version>3.4.2</version>
-						<executions>
-							<execution>
-								<id>assembly</id>
-								<phase>package</phase>
-							</execution>
-						</executions>
 						<configuration>
-							<finalName>${assembly.dir}</finalName>
-							<descriptors>
-								<descriptor>${basedir}/src/main/resources/assembly.xml</descriptor>
-							</descriptors>
-						</configuration>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>3.1.1</version>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-surefire-plugin</artifactId>
-						<version>2.22.2</version>
-						<configuration>
-							<argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>schemaValidation</id>
-			<build>
-				<plugins>
-					<!-- to create a executable jar to start the MzIdentMLSchemaValidator -->
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-jar-plugin</artifactId>
-						<version>3.1.2</version>
-						<configuration>
-							<finalName>mzIdentMLSchemaValidator</finalName>
-							<outputDirectory>mzIdentMLValidator</outputDirectory>
+							<outputDirectory>bin</outputDirectory>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+							<finalName>${project.artifactId}-${project.version}-gui</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
 							<archive>
 								<manifest>
-									<mainClass>psidev.psi.pi.validator.MzIdentMLSchemaValidator</mainClass>
-									<addClasspath>true</addClasspath>
-									<classpathPrefix>${lib.dir}</classpathPrefix>
+									<mainClass>psidev.psi.pi.validator.MzIdentMLValidatorGUI</mainClass>
 								</manifest>
 							</archive>
 						</configuration>
+						<executions>
+							<execution>
+								<id>make-my-jar-with-dependenciess</id>
+								<phase>package</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
+							</execution>
+						</executions>
 					</plugin>
+<!--					<plugin>-->
+<!--						<groupId>org.apache.maven.plugins</groupId>-->
+<!--						<artifactId>maven-javadoc-plugin</artifactId>-->
+<!--						<version>3.1.1</version>-->
+<!--					</plugin>-->
+<!--					<plugin>-->
+<!--						<groupId>org.apache.maven.plugins</groupId>-->
+<!--						<artifactId>maven-surefire-plugin</artifactId>-->
+<!--						<version>2.22.2</version>-->
+<!--						<configuration>-->
+<!--							<argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>-->
+<!--						</configuration>-->
+<!--					</plugin>-->
 				</plugins>
 			</build>
 		</profile>
+<!--		<profile>-->
+<!--			<id>schemaValidation</id>-->
+<!--			<build>-->
+<!--				<plugins>-->
+<!--					&lt;!&ndash; to create a executable jar to start the MzIdentMLSchemaValidator &ndash;&gt;-->
+<!--					<plugin>-->
+<!--						<groupId>org.apache.maven.plugins</groupId>-->
+<!--						<artifactId>maven-jar-plugin</artifactId>-->
+<!--						<version>3.1.2</version>-->
+<!--						<configuration>-->
+<!--							<finalName>mzIdentMLSchemaValidator</finalName>-->
+<!--							<outputDirectory>mzIdentMLValidator</outputDirectory>-->
+<!--							<archive>-->
+<!--								<manifest>-->
+<!--									<mainClass>psidev.psi.pi.validator.MzIdentMLSchemaValidator</mainClass>-->
+<!--									<addClasspath>true</addClasspath>-->
+<!--									<classpathPrefix>${lib.dir}</classpathPrefix>-->
+<!--								</manifest>-->
+<!--							</archive>-->
+<!--						</configuration>-->
+<!--					</plugin>-->
+<!--				</plugins>-->
+<!--			</build>-->
+<!--		</profile>-->
 		<profile>
 			<id>cmd</id>
 			<build>
