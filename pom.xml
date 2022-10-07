@@ -187,30 +187,6 @@
 				</plugins>
 			</build>
 		</profile>
-<!--		<profile>-->
-<!--			<id>schemaValidation</id>-->
-<!--			<build>-->
-<!--				<plugins>-->
-<!--					&lt;!&ndash; to create a executable jar to start the MzIdentMLSchemaValidator &ndash;&gt;-->
-<!--					<plugin>-->
-<!--						<groupId>org.apache.maven.plugins</groupId>-->
-<!--						<artifactId>maven-jar-plugin</artifactId>-->
-<!--						<version>3.1.2</version>-->
-<!--						<configuration>-->
-<!--							<finalName>mzIdentMLSchemaValidator</finalName>-->
-<!--							<outputDirectory>mzIdentMLValidator</outputDirectory>-->
-<!--							<archive>-->
-<!--								<manifest>-->
-<!--									<mainClass>psidev.psi.pi.validator.MzIdentMLSchemaValidator</mainClass>-->
-<!--									<addClasspath>true</addClasspath>-->
-<!--									<classpathPrefix>${lib.dir}</classpathPrefix>-->
-<!--								</manifest>-->
-<!--							</archive>-->
-<!--						</configuration>-->
-<!--					</plugin>-->
-<!--				</plugins>-->
-<!--			</build>-->
-<!--		</profile>-->
 		<profile>
 			<id>cmd</id>
 			<build>
