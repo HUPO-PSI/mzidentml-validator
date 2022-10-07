@@ -6,7 +6,6 @@ import java.util.List;
 import psidev.psi.tools.ontology_manager.OntologyManager;
 import psidev.psi.tools.validator.Context;
 import psidev.psi.tools.validator.MessageLevel;
-import psidev.psi.tools.validator.ValidatorException;
 import psidev.psi.tools.validator.ValidatorMessage;
 import uk.ac.ebi.jmzidml.MzIdentMLElement;
 import uk.ac.ebi.jmzidml.model.mzidml.CvParam;
@@ -55,10 +54,9 @@ public class OrganizationObjectRule extends AObjectRule<Organization> {
      * 
      * @param org the Organization element
      * @return collection of messages
-     * @throws ValidatorException validator exception
      */
     @Override
-    public Collection<ValidatorMessage> check(Organization org) throws ValidatorException {
+    public Collection<ValidatorMessage> check(Organization org) {
         List<ValidatorMessage> messages = new ArrayList<>();
 
         String cvValue;
@@ -96,16 +94,13 @@ public class OrganizationObjectRule extends AObjectRule<Organization> {
 
     /**
      * Gets the validator message for a CV term.
-     * @param org
-     * @param cvName
      * @return the ValidatorMessage
      */
     private ValidatorMessage getValidatorMsg(Organization org, String cvName) {
-        StringBuilder strB = new StringBuilder("The '");
-        strB.append(cvName).append("' cvParam in the Organization (id='");
-        strB.append(org.getId()).append("') element at ").append(OrganizationObjectRule.ORGANIZATION_CONTEXT.getContext()).append(" has an empty value.");
+        String strB = "The '" + cvName + "' cvParam in the Organization (id='" +
+                org.getId() + "') element at " + OrganizationObjectRule.ORGANIZATION_CONTEXT.getContext() + " has an empty value.";
         
-        return new ValidatorMessage(strB.toString(), MessageLevel.WARN, OrganizationObjectRule.ORGANIZATION_CONTEXT, this);        
+        return new ValidatorMessage(strB, MessageLevel.WARN, OrganizationObjectRule.ORGANIZATION_CONTEXT, this);
     }
     
     /**

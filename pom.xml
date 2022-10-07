@@ -77,31 +77,6 @@
 			<artifactId>xxindex</artifactId>
 			<version>0.23</version>
 		</dependency>
-
-<!--		<dependency>-->
-<!--			<groupId>javax.xml.bind</groupId>-->
-<!--			<artifactId>jaxb-api</artifactId>-->
-<!--			<version>2.3.1</version>-->
-<!--		</dependency>-->
-
-<!--		<dependency>-->
-<!--			<groupId>com.sun.xml.bind</groupId>-->
-<!--			<artifactId>jaxb-impl</artifactId>-->
-<!--			<version>2.3.1</version>-->
-<!--		</dependency>-->
-
-<!--		<dependency>-->
-<!--			<groupId>com.sun.xml.bind</groupId>-->
-<!--			<artifactId>jaxb-core</artifactId>-->
-<!--			<version>2.3.0</version>-->
-<!--		</dependency>-->
-
-<!--		<dependency>-->
-<!--			<groupId>org.glassfish.jaxb</groupId>-->
-<!--			<artifactId>jaxb-xjc</artifactId>-->
-<!--			<version>2.3.2</version>-->
-<!--		</dependency>-->
-
 	</dependencies>
 
 	<build>
@@ -173,7 +148,7 @@
 					</plugin>
 					<plugin>
 						<artifactId>maven-assembly-plugin</artifactId>
-						<version>3.1.1</version>
+						<version>3.4.2</version>
 						<executions>
 							<execution>
 								<id>assembly</id>
@@ -228,43 +203,33 @@
 			</build>
 		</profile>
 		<profile>
-			<id>commandlineValidator</id>
+			<id>cmd</id>
 			<build>
 				<plugins>
-					<!-- to create a executable jar to start the command line MzIdentMLValidator -->
 					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-jar-plugin</artifactId>
-						<version>3.1.2</version>
+						<artifactId>maven-assembly-plugin</artifactId>
 						<configuration>
-							<finalName>mzIdentMLValidator</finalName>
-							<!--
-                            <outputDirectory>mzIdentMLValidator</outputDirectory>
-                            -->
+							<outputDirectory>bin</outputDirectory>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+							<finalName>${project.artifactId}-${project.version}-cmd</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
 							<archive>
 								<manifest>
 									<mainClass>psidev.psi.pi.validator.MzIdentMLValidator</mainClass>
-									<addClasspath>true</addClasspath>
-									<classpathPrefix>${lib.dir}</classpathPrefix>
 								</manifest>
 							</archive>
 						</configuration>
-					</plugin>
-					<plugin>
-						<artifactId>maven-assembly-plugin</artifactId>
-						<version>3.1.1</version>
 						<executions>
 							<execution>
-								<id>assembly</id>
+								<id>make-my-jar-with-dependenciess</id>
 								<phase>package</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
 							</execution>
 						</executions>
-						<configuration>
-							<finalName>${assembly.dir}</finalName>
-							<descriptors>
-								<descriptor>${basedir}/src/main/resources/assembly_command_line.xml</descriptor>
-							</descriptors>
-						</configuration>
 					</plugin>
 				</plugins>
 			</build>

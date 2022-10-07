@@ -14,7 +14,6 @@ public enum MassSpectraTypeCondition {
 
     /**
      * Standard constructor.
-     * @param option 
      */
     MassSpectraTypeCondition(String option) {
         this.option = option;

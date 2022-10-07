@@ -6,7 +6,6 @@ import java.util.List;
 import psidev.psi.tools.ontology_manager.OntologyManager;
 import psidev.psi.tools.validator.Context;
 import psidev.psi.tools.validator.MessageLevel;
-import psidev.psi.tools.validator.ValidatorException;
 import psidev.psi.tools.validator.ValidatorMessage;
 import uk.ac.ebi.jmzidml.MzIdentMLElement;
 import uk.ac.ebi.jmzidml.model.mzidml.CvParam;
@@ -70,10 +69,9 @@ public class AdditionalSearchParamsObjectRule extends AObjectRule<SpectrumIdenti
      * 
      * @param sip the SpectrumIdentificationProtocol element
      * @return collection of messages
-     * @throws ValidatorException validator exception
      */
     @Override
-    public Collection<ValidatorMessage> check(SpectrumIdentificationProtocol sip) throws ValidatorException {
+    public Collection<ValidatorMessage> check(SpectrumIdentificationProtocol sip) {
         List<ValidatorMessage> messages = new ArrayList<>();
 
         // check for the special processing types

@@ -12,17 +12,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import javax.xml.bind.JAXBException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.log4j.LogManager;
@@ -81,9 +71,9 @@ public class MzIdentMLValidator extends Validator {
     /**
      * Enums.
      */
-    public static enum MzIdVersion {
+    public enum MzIdVersion {
         _1_1, _1_2
-    };
+    }
 
     /**
      * Members.
@@ -119,35 +109,26 @@ public class MzIdentMLValidator extends Validator {
      *            the object rule configuration file
      * @param mzIdentMLValidatorGUI
      *            the GUI
-     * @throws ValidatorException
-     *             in case the validator encounters unexpected errors.
      * @throws OntologyLoaderException
      *             in case of problems while loading the needed ontologies.
-     * @throws FileNotFoundException
-     *             in case of any configuration file doesn't exist.
-     * @throws CvRuleReaderException
-     *             in case of problems while reading cv mapping rules.
      * 
      */
     public MzIdentMLValidator(InputStream ontoConfig, InputStream aCvMappingFile, InputStream aCodedRuleFile, MzIdentMLValidatorGUI mzIdentMLValidatorGUI)
-            throws FileNotFoundException, ValidatorException, CvRuleReaderException, OntologyLoaderException {
+            throws OntologyLoaderException {
         super(ontoConfig);
 
         this.gui = mzIdentMLValidatorGUI;
         this.checkOntologyAccess();
 
-        final InputStream cvMappingFile = aCvMappingFile;
-        final InputStream objectRuleFile = aCodedRuleFile;
-
         try {
-            cvMappingFile.close();
-            objectRuleFile.close();
+            aCvMappingFile.close();
+            aCodedRuleFile.close();
         }
         catch (IOException e1) {
             e1.printStackTrace(System.err);
         }
 
-        this.setObjectAndMappingRules(cvMappingFile, objectRuleFile);
+        this.setObjectAndMappingRules(aCvMappingFile, aCodedRuleFile);
         this.resetCountersAndGUI();
     }
     
@@ -179,20 +160,12 @@ public class MzIdentMLValidator extends Validator {
      *            the ontology configuration file.
      * @param mzIdentMLValidatorGUI
      *            the GUI
-     * @throws ValidatorException
-     *             in case the validator encounters unexpected errors.
      * @throws OntologyLoaderException
      *             in case of problems while loading the needed ontologies.
-     * @throws FileNotFoundException
-     *             in case of any configuration file doesn't exist.
-     * @throws CvRuleReaderException
-     *             in case of problems while reading cv mapping rules.
-     * @throws UnknownHostException
-     *             in case of problems locating the host for .obo loading.
      * 
      */
     public MzIdentMLValidator(InputStream ontoConfig, MzIdentMLValidatorGUI mzIdentMLValidatorGUI)
-            throws OntologyLoaderException, FileNotFoundException, ValidatorException, CvRuleReaderException, UnknownHostException {
+            throws OntologyLoaderException {
         super(ontoConfig);
 
         this.gui = mzIdentMLValidatorGUI;
@@ -202,8 +175,7 @@ public class MzIdentMLValidator extends Validator {
 
     /**
      * Resets the counters and the GUI.
-     * 
-     * @param mzIdentMLValidatorGUI
+     *
      */
     private void resetCountersAndGUI() {
         this.resetCounters();
@@ -468,10 +440,7 @@ public class MzIdentMLValidator extends Validator {
 
             // flag if the version has changed
             MzIdVersion currentFileVersionTMP = this.getMzIdentMLVersion(mzIdentMLVersion);
-            boolean versionChange = false;
-            if (MzIdentMLValidator.currentFileVersion != null && MzIdentMLValidator.currentFileVersion != currentFileVersionTMP) {
-                versionChange = true;
-            }
+            boolean versionChange = MzIdentMLValidator.currentFileVersion != null && MzIdentMLValidator.currentFileVersion != currentFileVersionTMP;
             this.LOGGER.debug("MzIdentML file version set to :" + MzIdentMLValidator.currentFileVersion);
             MzIdentMLValidator.currentFileVersion = currentFileVersionTMP;
 
@@ -723,7 +692,7 @@ public class MzIdentMLValidator extends Validator {
                 this.setCvMappingRules(mappingRuleInputStream);
                 this.setObjectRules(objectRuleInputStream);
             }
-            catch (FileNotFoundException e) {
+            catch (IOException e) {
                 throw new ValidatorException("Error loading configuration files.", e);
             }
             catch (CvRuleReaderException e) {
@@ -774,12 +743,7 @@ public class MzIdentMLValidator extends Validator {
                     System.err.println("The provided file is not valid against the mzIdentML schema!");
                     System.err.println("Input file     : " + xmlFile.getAbsolutePath());
                     System.err.println("Schema location: " + this.schemaUri);
-                    this.getMessageCollection().stream().map((msg) -> {
-                        System.out.println(msg.getMessage());
-                        return msg;
-                    }).forEach((msg) -> {
-                        this.extendedReport.addInvalidSchemaValidationMessage(msg.getMessage());
-                    });
+                    this.getMessageCollection().stream().peek((msg) -> System.out.println(msg.getMessage())).forEach((msg) -> this.extendedReport.addInvalidSchemaValidationMessage(msg.getMessage()));
                     System.exit(MzIdentMLValidatorGUI.EXIT_FAILURE);
                 }
             }
@@ -829,7 +793,7 @@ public class MzIdentMLValidator extends Validator {
         if (this.ruleFilterManager != null) {
             this.updateProgress("Checking mandatory elements" + this. STR_ELLIPSIS);
             final List<String> mandatoryElements = this.ruleFilterManager.getMandatoryElements();
-            mandatoryElements.stream().map((elementName) -> this.getMzIdentMLElement(elementName)).forEach((mzMLElement) -> {
+            mandatoryElements.stream().map(this::getMzIdentMLElement).forEach((mzMLElement) -> {
                 // check if that element is present on the file
                 try {
                     final MzIdentMLObject mzIdentMLObject = this.unmarshaller.unmarshal(mzMLElement);
@@ -838,8 +802,6 @@ public class MzIdentMLValidator extends Validator {
                         final ValidatorMessage validatorMessage = new ValidatorMessage(
                             "The element on xPath:'" + mzMLElement.getXpath() + "' is required for the current type of validation.",
                             MessageLevel.ERROR, new Context(mzMLElement.getXpath()), mandatoryObjectRule);
-                        // extendedReport.objectRuleExecuted(mandatoryObjectRule, validatorMessage);
-                        // this.addObjectRule(mandatoryObjectRule);
                         this.addValidatorMessage(validatorMessage.getRule().getId(), validatorMessage, this.msgLevel);
                     }
                 }
@@ -942,11 +904,11 @@ public class MzIdentMLValidator extends Validator {
     private String getXLInteractionScoreMsg(ImmutablePair<String, String> key, HashMap<String, String> pagID2PDHID_Map) {
         StringBuilder strB = new StringBuilder();
         
-        String pagIDs_pdhIDs = this.gui.STR_EMPTY;
+        StringBuilder pagIDs_pdhIDs = new StringBuilder(this.gui.STR_EMPTY);
         String pdhID;
         for (String pagID : pagID2PDHID_Map.keySet()) {
             pdhID = pagID2PDHID_Map.get(pagID);
-            pagIDs_pdhIDs += "PAG: " + pagID + " and PDH: " + pdhID + TAB;
+            pagIDs_pdhIDs.append("PAG: ").append(pagID).append(" and PDH: ").append(pdhID).append(TAB);
         }                    
         strB.append("Interaction score is not paired for XL interaction ID ");
         strB.append(key.left).append(" and score ").append(key.right);
@@ -1133,10 +1095,7 @@ public class MzIdentMLValidator extends Validator {
                 this.extendedReport.objectRuleExecuted(rule, resultCheck);
 
                 if (this.ruleFilterManager != null) {
-                    boolean valid = true;
-                    if (resultCheck != null && !resultCheck.isEmpty()) {
-                        valid = false;
-                    }
+                    boolean valid = resultCheck == null || resultCheck.isEmpty();
                     this.ruleFilterManager.updateRulesToSkipByARuleResult(rule, valid);
                 }
                 if (resultCheck != null) {
@@ -1173,10 +1132,7 @@ public class MzIdentMLValidator extends Validator {
                     for (Object obj : collection) {
                         final Collection<ValidatorMessage> resultCheck = rule.check(obj, xPath);
                         if (this.ruleFilterManager != null) {
-                            boolean valid = true;
-                            if (resultCheck != null && !resultCheck.isEmpty()) {
-                                valid = false;
-                            }
+                            boolean valid = resultCheck == null || resultCheck.isEmpty();
                             this.ruleFilterManager.updateRulesToSkipByARuleResult(rule, valid);
                         }
                         messages.addAll(resultCheck);
@@ -1200,12 +1156,10 @@ public class MzIdentMLValidator extends Validator {
      * @param aLevel 
      */
     private void addSyncMessages(Map<String, List<ValidatorMessage>> sync_msgs, MessageLevel aLevel) {
-        sync_msgs.keySet().stream().forEach((key) -> {
+        sync_msgs.keySet().forEach((key) -> {
             final List<ValidatorMessage> list = sync_msgs.get(key);
             
-            list.stream().filter((aNewMessage) -> (aNewMessage.getLevel().isHigher(aLevel) || aNewMessage.getLevel().isSame(aLevel))).forEach((aNewMessage) -> {
-                this.addValidatorMessage(key, aNewMessage, this.msgLevel);
-            });
+            list.stream().filter((aNewMessage) -> (aNewMessage.getLevel().isHigher(aLevel) || aNewMessage.getLevel().isSame(aLevel))).forEach((aNewMessage) -> this.addValidatorMessage(key, aNewMessage, this.msgLevel));
         });
     }
 
@@ -1216,9 +1170,7 @@ public class MzIdentMLValidator extends Validator {
     private Collection<ValidatorMessage> getMessageCollection() {
         Collection<ValidatorMessage> ret = new HashSet<>();
         
-        this.msgs.keySet().stream().map((key) -> this.msgs.get(key)).filter((list) -> (list != null)).forEach((list) -> {
-            ret.addAll(list);
-        });
+        this.msgs.keySet().stream().map((key) -> this.msgs.get(key)).filter(Objects::nonNull).forEach(ret::addAll);
 
         return ret;
     }
@@ -1257,7 +1209,7 @@ public class MzIdentMLValidator extends Validator {
             }
             else {
                 if (errorHandler != null) {
-                    errorHandler.getErrorsAsValidatorMessages().stream().forEach((validatorMessage) -> {
+                    errorHandler.getErrorsAsValidatorMessages().forEach((validatorMessage) -> {
                         String ruleId = this.gui.STR_EMPTY;
                         Rule rule = validatorMessage.getRule();
                         if (rule != null) {
@@ -1674,14 +1626,9 @@ public class MzIdentMLValidator extends Validator {
         if (ValidatorCvContext.getInstance() != null && !ValidatorCvContext.getInstance().getNotRecognisedXpath().isEmpty()) {
             sb.append(TRIPLE_NEW_LINE).append("---------- ---------- CvContext statistics ---------- ----------").append(DOUBLE_NEW_LINE);
             // check for terms that were not anticipated with the rules in the CV mapping file.
-            ValidatorCvContext.getInstance().getNotRecognisedXpath().stream().map((xpath) -> {
-                sb.append(TAB).append(xpath).append(NEW_LINE);
-                return xpath;
-            }).forEach((xpath) -> {
+            ValidatorCvContext.getInstance().getNotRecognisedXpath().stream().peek((xpath) -> sb.append(TAB).append(xpath).append(NEW_LINE)).forEach((xpath) -> {
                 sb.append(TAB).append("unrecognized terms:").append(NEW_LINE);
-                ValidatorCvContext.getInstance().getNotRecognisedTerms(xpath).stream().forEach((term) -> {
-                    sb.append(term).append("; ");
-                });
+                ValidatorCvContext.getInstance().getNotRecognisedTerms(xpath).forEach((term) -> sb.append(term).append("; "));
             });
         }
 
@@ -1711,11 +1658,8 @@ public class MzIdentMLValidator extends Validator {
     /**
      * Main method for command line execution.
      * @param args the command line arguments
-     * @throws ValidatorException validator exception
-     * @throws OntologyLoaderException ontology loader exception
-     * @throws URISyntaxException URI syntax exception
      */
-    public static void main(String[] args) throws ValidatorException, OntologyLoaderException, URISyntaxException {
+    public static void main(String[] args) {
         if (args == null || args.length != 6) {
             printUsage();
         }
@@ -1766,7 +1710,7 @@ public class MzIdentMLValidator extends Validator {
                 System.out.println(DOUBLE_NEW_LINE + "All done. Goodbye.");
             }
         }
-        catch (FileNotFoundException | JAXBException | OntologyLoaderException | ValidatorException | CvRuleReaderException e) {
+        catch (FileNotFoundException | JAXBException | OntologyLoaderException e) {
             System.err.println(DOUBLE_NEW_LINE + "Exception occurred: " + e.getMessage());
             e.printStackTrace(System.err);
         }
@@ -1791,7 +1735,7 @@ public class MzIdentMLValidator extends Validator {
 
         // build a first clustering by message and rule
         Map<String, Map<Rule, Set<ValidatorMessage>>> clustering = new HashMap<>();
-        messages.stream().forEach((message) -> {
+        messages.forEach((message) -> {
             // if the message doesn't have an associated rule, store it directly (comes from schema validation)
             if (message.getRule() == null) {
                 clusteredMessages.add(message);
@@ -1825,24 +1769,18 @@ public class MzIdentMLValidator extends Validator {
         // build a second cluster by message level
         Map<MessageLevel, ClusteredContext> clusteringByMessageLevel = new EnumMap<>(MessageLevel.class);
 
-        clustering.entrySet().stream().forEach((entry) -> {
-            String message = entry.getKey();
-            Map<Rule, Set<ValidatorMessage>> ruleCluster = entry.getValue();
+        clustering.forEach((message, ruleCluster) -> {
 
             // cluster by message level and create proper validatorMessage
-            ruleCluster.entrySet().stream().forEach((ruleEntry) -> {
+            ruleCluster.forEach((rule, validatorMessages) -> {
                 clusteringByMessageLevel.clear();
 
-                Rule rule = ruleEntry.getKey();
-                Set<ValidatorMessage> validatorMessages = ruleEntry.getValue();
-
-                validatorMessages.stream().forEach((validatorMessage) -> {
+                validatorMessages.forEach((validatorMessage) -> {
                     if (clusteringByMessageLevel.containsKey(validatorMessage.getLevel())) {
                         ClusteredContext clusteredContext = clusteringByMessageLevel.get(validatorMessage.getLevel());
 
                         clusteredContext.getContexts().add(validatorMessage.getContext());
-                    }
-                    else {
+                    } else {
                         ClusteredContext clusteredContext = new ClusteredContext();
 
                         clusteredContext.getContexts().add(validatorMessage.getContext());
@@ -1851,9 +1789,7 @@ public class MzIdentMLValidator extends Validator {
                     }
                 });
 
-                clusteringByMessageLevel.entrySet().stream().forEach((levelEntry) -> {
-                    clusteredMessages.add(new ValidatorMessage(message, levelEntry.getKey(), levelEntry.getValue(), rule));
-                });
+                clusteringByMessageLevel.forEach((key, value) -> clusteredMessages.add(new ValidatorMessage(message, key, value, rule)));
             });
         });
 
@@ -1889,9 +1825,7 @@ public class MzIdentMLValidator extends Validator {
         
         if (!clearedMsgs.isEmpty()) {
             sb.append(DOUBLE_NEW_LINE).append("The following ").append(clearedMsgs.size()).append(" messages were obtained during the validation of your XML file:").append(NEW_LINE);
-            clearedMsgs.stream().forEach((valMsg) -> {
-                sb.append(" * ").append(valMsg).append(NEW_LINE);
-            });
+            clearedMsgs.forEach((valMsg) -> sb.append(" * ").append(valMsg).append(NEW_LINE));
         }
         else {
             sb.append(DOUBLE_NEW_LINE).append("Congratulations! Your XML file passed the semantic validation!").append(DOUBLE_NEW_LINE);
@@ -1973,13 +1907,12 @@ public class MzIdentMLValidator extends Validator {
         return result;
     }
 
-/******************************************************************************/
-/* INNER CLASSES to allow validation over element iterator in multiple threads*/
-/******************************************************************************/
+    /* INNER CLASSES to allow validation over element iterator in multiple threads*/
+
     /**
      * Simple wrapper class to allow synchronisation on the hasNext() and next() methods of the iterator.
      */
-    private class InnerIteratorSync<T> {
+    private static class InnerIteratorSync<T> {
         private Iterator<T> iter = null;
 
         /**

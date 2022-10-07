@@ -7,7 +7,6 @@ import psidev.psi.pi.validator.objectrules.util.URIValidator;
 import psidev.psi.tools.ontology_manager.OntologyManager;
 import psidev.psi.tools.validator.Context;
 import psidev.psi.tools.validator.MessageLevel;
-import psidev.psi.tools.validator.ValidatorException;
 import psidev.psi.tools.validator.ValidatorMessage;
 import uk.ac.ebi.jmzidml.MzIdentMLElement;
 import uk.ac.ebi.jmzidml.model.mzidml.Cv;
@@ -56,10 +55,9 @@ public class CvListObjectRule extends AObjectRule<CvList> {
      * Checks the CvList element.
      * @param cvList the CvList element
      * @return collection of messages
-     * @throws ValidatorException validator exception
      */
     @Override
-    public Collection<ValidatorMessage> check(CvList cvList) throws ValidatorException {
+    public Collection<ValidatorMessage> check(CvList cvList) {
         List<ValidatorMessage> messages = new ArrayList<>();
 
         this.checkCvVersion(cvList, messages);
@@ -165,7 +163,6 @@ public class CvListObjectRule extends AObjectRule<CvList> {
     
    /**
      * Gets the validator message for the CV version.
-     * @param cvID
      * @return the ValidatorMessage
      */
     private ValidatorMessage getValidatorVersionMsg(String cvID) {
@@ -176,7 +173,6 @@ public class CvListObjectRule extends AObjectRule<CvList> {
     
    /**
      * Gets the validator message for an old CV URI.
-     * @param cvID
      * @return the ValidatorMessage
      */
     private ValidatorMessage getValidatorOldURIMsg(String cvID) {
@@ -187,7 +183,6 @@ public class CvListObjectRule extends AObjectRule<CvList> {
     
    /**
      * Gets the validator message for an wrong CV URI.
-     * @param cvID
      * @return the ValidatorMessage
      */
     private ValidatorMessage getValidatorWrongURIMsg(String cvID) {
@@ -198,7 +193,6 @@ public class CvListObjectRule extends AObjectRule<CvList> {
     
    /**
      * Gets the validator message for an invalid CV URI.
-     * @param cvID
      * @return the ValidatorMessage
      */
     private ValidatorMessage getValidatorInvalidURIMsg(String cvID) {

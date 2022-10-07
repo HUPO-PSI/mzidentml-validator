@@ -7,7 +7,6 @@ import java.util.List;
 import psidev.psi.tools.ontology_manager.OntologyManager;
 import psidev.psi.tools.validator.Context;
 import psidev.psi.tools.validator.MessageLevel;
-import psidev.psi.tools.validator.ValidatorException;
 import psidev.psi.tools.validator.ValidatorMessage;
 import uk.ac.ebi.jmzidml.MzIdentMLElement;
 import uk.ac.ebi.jmzidml.model.mzidml.SpectrumIdentificationProtocol;
@@ -55,10 +54,9 @@ public class FragmentToleranceObjectRule extends AObjectRule<SpectrumIdentificat
      * 
      * @param protocol the SpectrumIdentificationProtocol element
      * @return collection of messages
-     * @throws ValidatorException validator exception
      */
     @Override
-    public Collection<ValidatorMessage> check(SpectrumIdentificationProtocol protocol) throws ValidatorException {
+    public Collection<ValidatorMessage> check(SpectrumIdentificationProtocol protocol) {
         List<ValidatorMessage> messages = new ArrayList<>();
 
         if (protocol.getFragmentTolerance() == null) {

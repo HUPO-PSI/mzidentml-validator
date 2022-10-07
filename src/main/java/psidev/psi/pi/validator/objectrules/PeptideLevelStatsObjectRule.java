@@ -7,7 +7,6 @@ import java.util.List;
 import psidev.psi.tools.ontology_manager.OntologyManager;
 import psidev.psi.tools.validator.Context;
 import psidev.psi.tools.validator.MessageLevel;
-import psidev.psi.tools.validator.ValidatorException;
 import psidev.psi.tools.validator.ValidatorMessage;
 import uk.ac.ebi.jmzidml.MzIdentMLElement;
 import uk.ac.ebi.jmzidml.model.mzidml.CvParam;
@@ -70,10 +69,9 @@ public class PeptideLevelStatsObjectRule extends AObjectRule<SpectrumIdentificat
      * 
      * @param sii the SpectrumIdentificationItem element
      * @return collection of messages
-     * @throws ValidatorException validator exception
      */
     @Override
-    public Collection<ValidatorMessage> check(SpectrumIdentificationItem sii) throws ValidatorException {
+    public Collection<ValidatorMessage> check(SpectrumIdentificationItem sii) {
         List<ValidatorMessage> messages = new ArrayList<>();
 
         if (AdditionalSearchParamsObjectRule.bIsPeptideLevelScoring) {
@@ -104,7 +102,6 @@ public class PeptideLevelStatsObjectRule extends AObjectRule<SpectrumIdentificat
     
     /**
      * Checks, if a term is a child of MS:1002358.
-     * @param acc
      * @return true, if the accession belongs to a CV term, which is a child of MS:1002358 ("search engine specific score for distinct peptides")
      */
     private boolean isASearchEnginePeptideScore(String acc) {
@@ -113,7 +110,6 @@ public class PeptideLevelStatsObjectRule extends AObjectRule<SpectrumIdentificat
 
     /**
      * Checks, if a term is a child of MS:1001143.
-     * @param acc
      * @return true, if the accession belongs to a CV term, which is a child of MS:1001143 ("search engine specific score for PSMs")
      */
     private boolean isASearchEnginePSMScore(String acc) {
@@ -122,8 +118,6 @@ public class PeptideLevelStatsObjectRule extends AObjectRule<SpectrumIdentificat
 
     /**
      * Adds a message to the messages collection.
-     * @param sii
-     * @param messages 
      */
     private void addMessageToCollection(SpectrumIdentificationItem sii, List<ValidatorMessage> messages) {
         messages.add(new ValidatorMessage("The SpectrumIdentificationItem (id='"

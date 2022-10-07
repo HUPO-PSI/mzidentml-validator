@@ -19,24 +19,24 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java-Klasse für anonymous complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType&gt;
  *   &lt;complexContent&gt;
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *     &lt;restriction base="{<a href="http://www.w3.org/2001/XMLSchema">...</a>}anyType"&gt;
  *       &lt;sequence&gt;
  *         &lt;element ref="{}ruleToSkip" maxOccurs="unbounded" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
- *       &lt;attribute name="id" use="required" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
- *       &lt;attribute name="valid" use="required" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *       &lt;attribute name="id" use="required" type="{<a href="http://www.w3.org/2001/XMLSchema">...</a>}string" /&gt;
+ *       &lt;attribute name="valid" use="required" type="{<a href="http://www.w3.org/2001/XMLSchema">...</a>}boolean" /&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
  * &lt;/complexType&gt;
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -75,7 +75,7 @@ public class RuleCondition {
      */
     public List<RuleToSkip> getRuleToSkip() {
         if (ruleToSkip == null) {
-            ruleToSkip = new ArrayList<RuleToSkip>();
+            ruleToSkip = new ArrayList<>();
         }
         return this.ruleToSkip;
     }

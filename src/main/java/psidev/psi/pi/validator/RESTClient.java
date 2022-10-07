@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -24,10 +23,6 @@ public class RESTClient {
     private final String STR_ACCEPT = "Accept";
     private final String STR_GET = "GET";
     private final int RET_OK = 200;
-    
-    /**
-     * Members.
-     */
 
     /**
      * Standard constructor.
@@ -63,16 +58,12 @@ public class RESTClient {
             }
 
             conn.disconnect();
-        }
-        catch (MalformedURLException exc) {
+        } catch (IOException exc) {
             exc.printStackTrace(System.err);
         }
-        catch (IOException exc) {
-            exc.printStackTrace(System.err);
-        }
-        
+
         System.out.println("Output from Server .... \n");
-        System.out.println(strB.toString());
+        System.out.println(strB);
         
         return strB.toString();
     }

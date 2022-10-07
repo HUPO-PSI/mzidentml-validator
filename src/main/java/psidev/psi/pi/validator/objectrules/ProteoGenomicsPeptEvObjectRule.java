@@ -6,7 +6,6 @@ import java.util.List;
 import psidev.psi.tools.ontology_manager.OntologyManager;
 import psidev.psi.tools.validator.Context;
 import psidev.psi.tools.validator.MessageLevel;
-import psidev.psi.tools.validator.ValidatorException;
 import psidev.psi.tools.validator.ValidatorMessage;
 import uk.ac.ebi.jmzidml.MzIdentMLElement;
 import uk.ac.ebi.jmzidml.model.mzidml.CvParam;
@@ -66,10 +65,9 @@ public class ProteoGenomicsPeptEvObjectRule extends AObjectRule<PeptideEvidence>
      * 
      * @param pev the PeptideEvidence element
      * @return collection of messages
-     * @throws ValidatorException validator exception
      */
     @Override
-    public Collection<ValidatorMessage> check(PeptideEvidence pev) throws ValidatorException {
+    public Collection<ValidatorMessage> check(PeptideEvidence pev) {
         List<ValidatorMessage> messages = new ArrayList<>();
 
         if (AdditionalSearchParamsObjectRule.bIsProteoGenomicsSearch && !pev.isIsDecoy()) {
@@ -110,8 +108,6 @@ public class ProteoGenomicsPeptEvObjectRule extends AObjectRule<PeptideEvidence>
     
     /**
      * Adds a message to the messages collection.
-     * @param pev
-     * @param messages 
      */
     private void addMessageToCollection(PeptideEvidence pev, List<ValidatorMessage> messages) {
         messages.add(new ValidatorMessage("The PeptideEvidence (id='"

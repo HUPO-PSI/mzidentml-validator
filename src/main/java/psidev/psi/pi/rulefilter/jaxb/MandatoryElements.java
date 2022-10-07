@@ -18,13 +18,13 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java-Klasse für anonymous complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType&gt;
  *   &lt;complexContent&gt;
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *     &lt;restriction base="{<a href="http://www.w3.org/2001/XMLSchema">...</a>}anyType"&gt;
  *       &lt;choice&gt;
  *         &lt;element ref="{}mandatoryElement" maxOccurs="unbounded"/&gt;
  *       &lt;/choice&gt;
@@ -32,8 +32,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent&gt;
  * &lt;/complexType&gt;
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -68,7 +68,7 @@ public class MandatoryElements {
      */
     public List<MandatoryElement> getMandatoryElement() {
         if (mandatoryElement == null) {
-            mandatoryElement = new ArrayList<MandatoryElement>();
+            mandatoryElement = new ArrayList<>();
         }
         return this.mandatoryElement;
     }

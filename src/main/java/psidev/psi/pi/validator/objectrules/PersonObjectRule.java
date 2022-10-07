@@ -6,7 +6,6 @@ import java.util.List;
 import psidev.psi.tools.ontology_manager.OntologyManager;
 import psidev.psi.tools.validator.Context;
 import psidev.psi.tools.validator.MessageLevel;
-import psidev.psi.tools.validator.ValidatorException;
 import psidev.psi.tools.validator.ValidatorMessage;
 import uk.ac.ebi.jmzidml.MzIdentMLElement;
 import uk.ac.ebi.jmzidml.model.mzidml.CvParam;
@@ -55,10 +54,9 @@ public class PersonObjectRule extends AObjectRule<Person> {
      * 
      * @param pers the Person element
      * @return collection of messages
-     * @throws ValidatorException validator exception
      */
     @Override
-    public Collection<ValidatorMessage> check(Person pers) throws ValidatorException {
+    public Collection<ValidatorMessage> check(Person pers) {
         List<ValidatorMessage> messages = new ArrayList<>();
 
         String cvValue;
@@ -94,16 +92,13 @@ public class PersonObjectRule extends AObjectRule<Person> {
 
    /**
      * Gets the validator message for a CV term.
-     * @param pers
-     * @param cvName
      * @return the ValidatorMessage
      */
     private ValidatorMessage getValidatorMsg(Person pers, String cvName) {
-        StringBuilder strB = new StringBuilder("The '");
-        strB.append(cvName).append("' cvParam in the Person (id='");
-        strB.append(pers.getId()).append("') element at ").append(PersonObjectRule.PERSON_CONTEXT.getContext()).append(" has an empty value.");
+        String strB = "The '" + cvName + "' cvParam in the Person (id='" +
+                pers.getId() + "') element at " + PersonObjectRule.PERSON_CONTEXT.getContext() + " has an empty value.";
         
-        return new ValidatorMessage(strB.toString(), MessageLevel.WARN, PersonObjectRule.PERSON_CONTEXT, this);        
+        return new ValidatorMessage(strB, MessageLevel.WARN, PersonObjectRule.PERSON_CONTEXT, this);
     }
     
     /**

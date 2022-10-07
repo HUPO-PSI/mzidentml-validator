@@ -8,7 +8,6 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import psidev.psi.tools.ontology_manager.OntologyManager;
 import psidev.psi.tools.validator.Context;
 import psidev.psi.tools.validator.MessageLevel;
-import psidev.psi.tools.validator.ValidatorException;
 import psidev.psi.tools.validator.ValidatorMessage;
 import uk.ac.ebi.jmzidml.MzIdentMLElement;
 import uk.ac.ebi.jmzidml.model.mzidml.CvParam;
@@ -22,7 +21,7 @@ import uk.ac.ebi.jmzidml.model.mzidml.SpectrumIdentificationResult;
  * For isotope labelled linkers we can have the double number of SIIs for the
  * same cross-link, e.g. 4 instead of 2. But for different chargeStates the value
  * of the SIIs must be different (see Feature D in Figure 3 of the spec doc).
- * 
+ * <p>
  * Remark: The number of SIIs with the same value and the same chargeState
  *         for the same cross-link must be 2 or 4 (for isotope labelled linkers).
  *         For different chargeStates the value of the SIIs must be different.
@@ -83,10 +82,9 @@ public class XLinkSIIObjectRule extends AObjectRule<SpectrumIdentificationResult
      * 
      * @param sir the SpectrumIdentificationResult element
      * @return collection of messages
-     * @throws ValidatorException validator exception
      */
     @Override
-    public Collection<ValidatorMessage> check(SpectrumIdentificationResult sir) throws ValidatorException {
+    public Collection<ValidatorMessage> check(SpectrumIdentificationResult sir) {
         List<ValidatorMessage> messages = new ArrayList<>();
 
         if (AdditionalSearchParamsObjectRule.bIsCrossLinkingSearch) {
@@ -96,33 +94,31 @@ public class XLinkSIIObjectRule extends AObjectRule<SpectrumIdentificationResult
             for (SpectrumIdentificationItem sii: sir.getSpectrumIdentificationItem()) {
                 for (CvParam cv: sii.getCvParam()) {
                     if (cv != null) {
-                        switch (cv.getAccession()) {
-                            case "MS:1002511":  // cross-link spectrum identification item
-                                String cvValue = cv.getValue();
+                        if ("MS:1002511".equals(cv.getAccession())) {  // cross-link spectrum identification item
+                            String cvValue = cv.getValue();
 
-                                if (cvValue.isEmpty()) {
-                                    messages.add(new ValidatorMessage("The '" + cv.getName()
+                            if (cvValue.isEmpty()) {
+                                messages.add(new ValidatorMessage("The '" + cv.getName()
                                         + "' cvParam in the SpectrumIdentificationItem (id='" + sii.getId() + "') element at "
                                         + XLinkSIIObjectRule.SIR_CONTEXT.getContext() + " has an empty value.",
                                         MessageLevel.WARN, XLinkSIIObjectRule.SIR_CONTEXT, this));
-                                }
+                            }
 
-                                // fill the first map
-                                sirID_CvValue_key = new ImmutablePair<>(sirID, cvValue);
-                                if (!XLinkSIIObjectRule.XL_SIRID_AND_CVVALUE2SII_IDLISTMAP.containsKey(sirID_CvValue_key)) {
-                                    XLinkSIIObjectRule.XL_SIRID_AND_CVVALUE2SII_IDLISTMAP.put(sirID_CvValue_key, new ArrayList<>());
-                                }
-                                XLinkSIIObjectRule.XL_SIRID_AND_CVVALUE2SII_IDLISTMAP.get(sirID_CvValue_key).add(sii.getId());
+                            // fill the first map
+                            sirID_CvValue_key = new ImmutablePair<>(sirID, cvValue);
+                            if (!XLinkSIIObjectRule.XL_SIRID_AND_CVVALUE2SII_IDLISTMAP.containsKey(sirID_CvValue_key)) {
+                                XLinkSIIObjectRule.XL_SIRID_AND_CVVALUE2SII_IDLISTMAP.put(sirID_CvValue_key, new ArrayList<>());
+                            }
+                            XLinkSIIObjectRule.XL_SIRID_AND_CVVALUE2SII_IDLISTMAP.get(sirID_CvValue_key).add(sii.getId());
 
-                                // fill the second map
-                                sirID_CvValue_key = new ImmutablePair<>(sirID, cvValue);
-                                if (!XLinkSIIObjectRule.XL_SIRID_AND_CVVALUE2CHARGESTATELISTMAP.containsKey(sirID_CvValue_key)) {
-                                    XLinkSIIObjectRule.XL_SIRID_AND_CVVALUE2CHARGESTATELISTMAP.put(sirID_CvValue_key, new ArrayList<>());
-                                }
-                                if (!XLinkSIIObjectRule.XL_SIRID_AND_CVVALUE2CHARGESTATELISTMAP.get(sirID_CvValue_key).contains(sii.getChargeState())) {
-                                    XLinkSIIObjectRule.XL_SIRID_AND_CVVALUE2CHARGESTATELISTMAP.get(sirID_CvValue_key).add(sii.getChargeState());
-                                }
-                                break;
+                            // fill the second map
+                            sirID_CvValue_key = new ImmutablePair<>(sirID, cvValue);
+                            if (!XLinkSIIObjectRule.XL_SIRID_AND_CVVALUE2CHARGESTATELISTMAP.containsKey(sirID_CvValue_key)) {
+                                XLinkSIIObjectRule.XL_SIRID_AND_CVVALUE2CHARGESTATELISTMAP.put(sirID_CvValue_key, new ArrayList<>());
+                            }
+                            if (!XLinkSIIObjectRule.XL_SIRID_AND_CVVALUE2CHARGESTATELISTMAP.get(sirID_CvValue_key).contains(sii.getChargeState())) {
+                                XLinkSIIObjectRule.XL_SIRID_AND_CVVALUE2CHARGESTATELISTMAP.get(sirID_CvValue_key).add(sii.getChargeState());
+                            }
                         }
                     }
                 }

@@ -18,7 +18,6 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 /**
  * @author Florian Reisinger
@@ -59,7 +58,6 @@ public class MzIdentMLSchemaValidator {
      *            (performed by the implementing sub-class of this abstract class.)
      * @return an XMLValidationErrorHandler that can be queried for details of any
      *            parsing errors to retrieve plain text or HTML
-     * @throws org.xml.sax.SAXException
      */
     private MzIdentMLValidationErrorHandler validateAgainstSchema(Reader reader, Schema schema) throws SAXException {
         final MzIdentMLValidationErrorHandler mzMLValidationErrorHandler = new MzIdentMLValidationErrorHandler();
@@ -70,8 +68,6 @@ public class MzIdentMLSchemaValidator {
             XMLStreamReader xmlStreamReader = XMLInputFactory.newInstance().createXMLStreamReader(reader);
             validator.validate(new StAXSource(xmlStreamReader));
         } catch (IOException e) {
-            mzMLValidationErrorHandler.fatalError(e);
-        } catch (SAXParseException e) {
             mzMLValidationErrorHandler.fatalError(e);
         } catch (XMLStreamException | FactoryConfigurationError e) {
             e.printStackTrace(System.err);
@@ -159,12 +155,7 @@ public class MzIdentMLSchemaValidator {
             // Set the schema.
             validator.setSchema(schemaFile.toURI());
             System.out.println(NEW_LINE + "Retrieving files from '" + inputFolder.getAbsolutePath() + "'...");
-            File[] inputFiles = inputFolder.listFiles((File dir, String name) -> name.toLowerCase().endsWith(STR_FILE_EXT_MZID) || name.toLowerCase().endsWith(STR_FILE_EXT_XML) /**
-             * Tests, if the file has a valid extension.
-             * @param dir
-             * @param name
-             * @return true, if it's a .mzid or .xml file
-             */ );
+            File[] inputFiles = inputFolder.listFiles((File dir, String name) -> name.toLowerCase().endsWith(STR_FILE_EXT_MZID) || name.toLowerCase().endsWith(STR_FILE_EXT_XML));
             
             System.out.println("Found " + inputFiles.length + " input files." + NEW_LINE);
             System.out.println("Validating files...");
@@ -177,9 +168,7 @@ public class MzIdentMLSchemaValidator {
                 }
                 else {
                     System.out.println(MzIdentMLSchemaValidator.STR4_INDENTATION + "* Errors detected: ");
-                    xveh.getErrorsAsValidatorMessages().forEach((vMsg) -> {
-                        System.out.println(vMsg.getMessage());
-                    });
+                    xveh.getErrorsAsValidatorMessages().forEach((vMsg) -> System.out.println(vMsg.getMessage()));
                 }
                 br.close();
             }
@@ -205,9 +194,8 @@ public class MzIdentMLSchemaValidator {
      * Prints a usage message.
      */
     private static void printUsage() {
-        StringBuilder out = new StringBuilder();
-        out.append(DOUBLE_NEW_LINE).append("Usage: java ").append(MzIdentMLSchemaValidator.class.getName());
-        out.append(" <schema_file> <inputfolder> ");
-        System.out.println(out.toString());
+        String out = DOUBLE_NEW_LINE + "Usage: java " + MzIdentMLSchemaValidator.class.getName() +
+                " <schema_file> <inputfolder> ";
+        System.out.println(out);
     }
 }

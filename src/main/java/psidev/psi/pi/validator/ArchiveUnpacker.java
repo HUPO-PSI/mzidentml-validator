@@ -1,8 +1,9 @@
 package psidev.psi.pi.validator;
 
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipInputStream;
 import org.apache.log4j.LogManager;
@@ -29,7 +30,7 @@ public class ArchiveUnpacker {
 
         try {
             FileOutputStream out;
-            try (GZIPInputStream gzipIS = new GZIPInputStream(new FileInputStream(gzipFile))) {
+            try (GZIPInputStream gzipIS = new GZIPInputStream(Files.newInputStream(Paths.get(gzipFile)))) {
                 out = new FileOutputStream(unzippedFile);
                 int len;
                 while ((len = gzipIS.read(buffer)) > 0) {
@@ -53,7 +54,7 @@ public class ArchiveUnpacker {
 
         try {
             FileOutputStream out;
-            try (ZipInputStream zipIS = new ZipInputStream(new FileInputStream(zipFile))) {
+            try (ZipInputStream zipIS = new ZipInputStream(Files.newInputStream(Paths.get(zipFile)))) {
                 out = new FileOutputStream(unzippedFile);
                 int len;
                 while ((len = zipIS.read(buffer)) > 0) {
@@ -74,25 +75,5 @@ public class ArchiveUnpacker {
      */
     public static void decompress7zFile(String seven_zFile, String unzippedFile) {
         LOGGER.debug("Support for .7z files not yet implemented");
-        /*
-        try {
-            FileOutputStream out = null;
-            try {
-                ArchiveInputStream in = new ArchiveStreamFactory().createArchiveInputStream(ArchiveStreamFactory.SEVEN_Z, new FileInputStream(seven_zFile));
-                ZipArchiveEntry entry = (ZipArchiveEntry)in.getNextEntry();
-                out = new FileOutputStream(unzippedFile);
-                IOUtils.copy(in, out);
-            }
-            catch (ArchiveException exc) {
-                exc.printStackTrace(System.err);   
-            }
-            if (out != null) {
-                out.close();
-            }
-        }
-        catch (IOException exc) {
-            exc.printStackTrace(System.err);   
-        }
-        */
     }
 }

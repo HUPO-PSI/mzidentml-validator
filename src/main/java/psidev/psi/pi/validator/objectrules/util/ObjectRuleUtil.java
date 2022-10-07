@@ -3,6 +3,7 @@ package psidev.psi.pi.validator.objectrules.util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 import uk.ac.ebi.jmzidml.model.mzidml.CvParam;
 
@@ -18,9 +19,7 @@ public class ObjectRuleUtil {
         List<CvParam> ret = new ArrayList<>();
         
         if (cvParams != null && accessions != null) {
-            accessions.stream().map((accession) -> checkAccessionsInCVParams(cvParams, accession)).filter((cvParam) -> (cvParam != null)).forEach((cvParam) -> {
-                ret.add(cvParam);
-            });
+            accessions.stream().map((accession) -> checkAccessionsInCVParams(cvParams, accession)).filter(Objects::nonNull).forEach(ret::add);
         }
         
         return ret;

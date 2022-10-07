@@ -13,7 +13,6 @@ public enum CleavageRuleCondition {
 
     /**
      * Standard constructor.
-     * @param option 
      */
     CleavageRuleCondition(String option) {
         this.option = option;

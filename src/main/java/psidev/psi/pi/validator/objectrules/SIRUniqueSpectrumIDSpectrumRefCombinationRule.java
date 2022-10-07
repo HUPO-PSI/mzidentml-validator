@@ -8,7 +8,6 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import psidev.psi.tools.ontology_manager.OntologyManager;
 import psidev.psi.tools.validator.Context;
 import psidev.psi.tools.validator.MessageLevel;
-import psidev.psi.tools.validator.ValidatorException;
 import psidev.psi.tools.validator.ValidatorMessage;
 import uk.ac.ebi.jmzidml.MzIdentMLElement;
 import uk.ac.ebi.jmzidml.model.mzidml.SpectrumIdentificationResult;
@@ -66,10 +65,9 @@ public class SIRUniqueSpectrumIDSpectrumRefCombinationRule extends AObjectRule<S
      * 
      * @param sir the SpectrumIdentificationResult element
      * @return collection of messages
-     * @throws ValidatorException validator exception
      */
     @Override
-    public Collection<ValidatorMessage> check(SpectrumIdentificationResult sir) throws ValidatorException {
+    public Collection<ValidatorMessage> check(SpectrumIdentificationResult sir) {
         List<ValidatorMessage> messages = new ArrayList<>();
 
         if (bIsFinalPSMList) {

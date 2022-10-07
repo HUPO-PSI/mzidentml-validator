@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import psidev.psi.tools.ontology_manager.OntologyManager;
-import psidev.psi.tools.validator.ValidatorException;
 import psidev.psi.tools.validator.ValidatorMessage;
 
 /**
@@ -42,10 +41,9 @@ public class MandatoryElementsObjectRule extends AObjectRule<Object> {
      * Checks the Object.
      * @param obj   the object to check
      * @return collection of messages
-     * @throws ValidatorException validator exception
      */
     @Override
-    public Collection<ValidatorMessage> check(Object obj) throws ValidatorException {
+    public Collection<ValidatorMessage> check(Object obj) {
         return new ArrayList<>();
     }
 }

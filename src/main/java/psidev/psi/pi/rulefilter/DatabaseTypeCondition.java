@@ -13,7 +13,6 @@ public enum DatabaseTypeCondition {
 
     /**
      * Standard constructor.
-     * @param option 
      */
     DatabaseTypeCondition(String option) {
         this.option = option;

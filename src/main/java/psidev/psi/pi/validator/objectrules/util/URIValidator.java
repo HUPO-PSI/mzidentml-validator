@@ -14,8 +14,8 @@ public class URIValidator {
     /**
      * Constants.
      */
-    private final static Set<String> PROTOCOLS          = new HashSet<String>(Arrays.asList(new String[] {"mailto", "news", "urn"}));
-    private final static Set<String> PROTOCOLS_WITH_HOST= new HashSet<String>(Arrays.asList(new String[] {"file", "ftp", "http", "https"}));
+    private final static Set<String> PROTOCOLS          = new HashSet<>(Arrays.asList("mailto", "news", "urn"));
+    private final static Set<String> PROTOCOLS_WITH_HOST= new HashSet<>(Arrays.asList("file", "ftp", "http", "https"));
     static {
         PROTOCOLS.addAll(PROTOCOLS_WITH_HOST);
     }

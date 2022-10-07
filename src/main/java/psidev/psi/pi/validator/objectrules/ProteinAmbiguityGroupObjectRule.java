@@ -8,7 +8,6 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import psidev.psi.tools.ontology_manager.OntologyManager;
 import psidev.psi.tools.validator.Context;
 import psidev.psi.tools.validator.MessageLevel;
-import psidev.psi.tools.validator.ValidatorException;
 import psidev.psi.tools.validator.ValidatorMessage;
 import uk.ac.ebi.jmzidml.MzIdentMLElement;
 import uk.ac.ebi.jmzidml.model.mzidml.CvParam;
@@ -20,13 +19,13 @@ import uk.ac.ebi.jmzidml.model.mzidml.ProteinDetectionHypothesis;
  * Only one PDH in a PAG can be labeled as "group representative"
  * (MS:1002403), and if found, the PDH must be labeled as a "leading protein"
  * (MS:1002401), otherwise, a level-ERROR message will be reported.
- * 
+ * <p>
  * If all the PDHs labeled as "leading protein" in a PAG do not contain
  * "group representative", a level-INFO message will be reported.
- * 
+ * <p>
  * If there is not any PDH in a PAG with "group representative" term, report a
  * level-INFO message.
- * 
+ * <p>
  * In case of a cross-linking file it is checked, that there are cross-linking
  * interaction scores sharing the same ID and score within different
  * ProteinAmbiguityGroup (PAG) elements.
@@ -90,10 +89,9 @@ public class ProteinAmbiguityGroupObjectRule extends AObjectRule<ProteinAmbiguit
      * Checks a ProteinAmbiguityGroup element.
      * @param pag the ProteinAmbiguityGroup element
      * @return collection of messages
-     * @throws ValidatorException validator exception
      */
     @Override
-    public Collection<ValidatorMessage> check(ProteinAmbiguityGroup pag) throws ValidatorException {
+    public Collection<ValidatorMessage> check(ProteinAmbiguityGroup pag) {
         List<ValidatorMessage> messages = new ArrayList<>();
 
         List<ProteinDetectionHypothesis> pdhs = pag.getProteinDetectionHypothesis();
@@ -188,7 +186,7 @@ public class ProteinAmbiguityGroupObjectRule extends AObjectRule<ProteinAmbiguit
                             String score = restStr.substring(posNext + 1, posLast);
                             ImmutablePair<String, String> key = new ImmutablePair<>(xlInteractID, score);
                             if (!ProteinAmbiguityGroupObjectRule.XL_ID_SCORE_PAIR_TO_PAGID2PDHID.containsKey(key)) {
-                                ProteinAmbiguityGroupObjectRule.XL_ID_SCORE_PAIR_TO_PAGID2PDHID.put((ImmutablePair<String, String>) key, new HashMap<>());
+                                ProteinAmbiguityGroupObjectRule.XL_ID_SCORE_PAIR_TO_PAGID2PDHID.put(key, new HashMap<>());
                                 ProteinAmbiguityGroupObjectRule.INTERACT_ID_TO_SUFFIX_MAP.put(xlInteractID, xlInteractIDSuffix);
                             }
                             else { // special handling for loop links
@@ -238,7 +236,6 @@ public class ProteinAmbiguityGroupObjectRule extends AObjectRule<ProteinAmbiguit
     
     /**
      * Checks, if a term is a child of MS:1002675.
-     * @param acc
      * @return true, if the accession belongs to a CV term, which is a child of MS:1002675 ("cross-linking result details")
      */
     private boolean isAXLInteractionScore(String acc) {
@@ -257,19 +254,18 @@ public class ProteinAmbiguityGroupObjectRule extends AObjectRule<ProteinAmbiguit
      * @param messages  the list of messages
      */
     private void addRegexViolationMessageToCollection(CvParam cvParam, ProteinAmbiguityGroup pag, ProteinDetectionHypothesis pdh, List<ValidatorMessage> messages) {
-        StringBuilder strB = new StringBuilder();
+
+        String strB = "The regular expression for the cross-linking interaction score in ProteinDetectionHypothesis (id='" +
+                pdh.getId() +
+                "' of ProteinAmbiguityGroup (id='" +
+                pag.getId() +
+                "') element at " +
+                ProteinAmbiguityGroupObjectRule.PAG_CONTEXT.getContext() +
+                "/cvParam ('" +
+                cvParam.getName() +
+                "') is not valid.";
         
-        strB.append("The regular expression for the cross-linking interaction score in ProteinDetectionHypothesis (id='");
-        strB.append(pdh.getId());
-        strB.append("' of ProteinAmbiguityGroup (id='");
-        strB.append(pag.getId());
-        strB.append("') element at ");
-        strB.append(ProteinAmbiguityGroupObjectRule.PAG_CONTEXT.getContext());
-        strB.append("/cvParam ('");
-        strB.append(cvParam.getName());
-        strB.append("') is not valid.");
-        
-        messages.add(new ValidatorMessage(strB.toString(), MessageLevel.ERROR, ProteinAmbiguityGroupObjectRule.PAG_CONTEXT, this));
+        messages.add(new ValidatorMessage(strB, MessageLevel.ERROR, ProteinAmbiguityGroupObjectRule.PAG_CONTEXT, this));
     }
     
     /**
@@ -278,15 +274,14 @@ public class ProteinAmbiguityGroupObjectRule extends AObjectRule<ProteinAmbiguit
      * @return the ValidatorMessage
      */
     private ValidatorMessage getValidatorNotUniqueGroupRepresentativeMsg(ProteinAmbiguityGroup pag) {
-        StringBuilder strB = new StringBuilder();
+
+        String strB = "Only one ProteinDetectionHypothesis in the ProteinAmbiguityGroup '" +
+                pag.getId() +
+                "' can contain the CV Term " +
+                ProteinAmbiguityGroupObjectRule.GROUP_REPRESENTATIVE +
+                " (group representative) at ";
         
-        strB.append("Only one ProteinDetectionHypothesis in the ProteinAmbiguityGroup '");
-        strB.append(pag.getId());
-        strB.append("' can contain the CV Term ");
-        strB.append(ProteinAmbiguityGroupObjectRule.GROUP_REPRESENTATIVE);
-        strB.append(" (group representative) at ");
-        
-        return new ValidatorMessage(strB.toString() + ProteinAmbiguityGroupObjectRule.PAG_CONTEXT.getContext(), MessageLevel.ERROR, ProteinAmbiguityGroupObjectRule.PAG_CONTEXT, this);
+        return new ValidatorMessage(strB + ProteinAmbiguityGroupObjectRule.PAG_CONTEXT.getContext(), MessageLevel.ERROR, ProteinAmbiguityGroupObjectRule.PAG_CONTEXT, this);
     }
     
     /**
@@ -295,17 +290,16 @@ public class ProteinAmbiguityGroupObjectRule extends AObjectRule<ProteinAmbiguit
      * @return the ValidatorMessage
      */
     private ValidatorMessage getValidatorMustContainGroupRepresentativeMsg(ProteinAmbiguityGroup pag) {
-        StringBuilder strB = new StringBuilder();
+
+        String strB = "At least one of the ProteinDetectionHypothesis labeled as 'leading protein' (" +
+                ProteinAmbiguityGroupObjectRule.LEADING_PROTEIN +
+                ") may be a 'group representative' (" +
+                ProteinAmbiguityGroupObjectRule.GROUP_REPRESENTATIVE +
+                ") in ProteinAmbiguityGroup id='" +
+                pag.getId() +
+                "' at ";
         
-        strB.append("At least one of the ProteinDetectionHypothesis labeled as 'leading protein' (");
-        strB.append(ProteinAmbiguityGroupObjectRule.LEADING_PROTEIN);
-        strB.append(") may be a 'group representative' (");
-        strB.append(ProteinAmbiguityGroupObjectRule.GROUP_REPRESENTATIVE);
-        strB.append(") in ProteinAmbiguityGroup id='");
-        strB.append(pag.getId());
-        strB.append("' at ");
-        
-        return new ValidatorMessage(strB.toString() + ProteinAmbiguityGroupObjectRule.PAG_CONTEXT.getContext(), MessageLevel.INFO, ProteinAmbiguityGroupObjectRule.PAG_CONTEXT, this);       
+        return new ValidatorMessage(strB + ProteinAmbiguityGroupObjectRule.PAG_CONTEXT.getContext(), MessageLevel.INFO, ProteinAmbiguityGroupObjectRule.PAG_CONTEXT, this);
     }
     
     /**
@@ -315,15 +309,14 @@ public class ProteinAmbiguityGroupObjectRule extends AObjectRule<ProteinAmbiguit
      * @return the ValidatorMessage
      */
     private ValidatorMessage getValidatorWrongInteractionScoreMsg(ProteinAmbiguityGroup pag, ProteinDetectionHypothesis pdh) {
-        StringBuilder strB = new StringBuilder();
+
+        String strB = "ProteinDetectionHypothesis contains an invalid cross-linking interaction score in ProteinDetectionHypothesis id='" +
+                pdh.getId() +
+                "' of ProteinAmbiguityGroup id='" +
+                pag.getId() +
+                "' at ";
         
-        strB.append("ProteinDetectionHypothesis contains an invalid cross-linking interaction score in ProteinDetectionHypothesis id='");
-        strB.append(pdh.getId());
-        strB.append("' of ProteinAmbiguityGroup id='");
-        strB.append(pag.getId());
-        strB.append("' at ");
-        
-        return new ValidatorMessage(strB.toString() + ProteinAmbiguityGroupObjectRule.PAG_CONTEXT.getContext(), MessageLevel.INFO, ProteinAmbiguityGroupObjectRule.PAG_CONTEXT, this);       
+        return new ValidatorMessage(strB + ProteinAmbiguityGroupObjectRule.PAG_CONTEXT.getContext(), MessageLevel.INFO, ProteinAmbiguityGroupObjectRule.PAG_CONTEXT, this);
     }
     
     /**

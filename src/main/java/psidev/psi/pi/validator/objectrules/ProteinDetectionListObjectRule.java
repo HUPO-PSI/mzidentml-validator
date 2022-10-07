@@ -8,7 +8,6 @@ import psidev.psi.pi.validator.MzIdentMLValidator;
 import psidev.psi.tools.ontology_manager.OntologyManager;
 import psidev.psi.tools.validator.Context;
 import psidev.psi.tools.validator.MessageLevel;
-import psidev.psi.tools.validator.ValidatorException;
 import psidev.psi.tools.validator.ValidatorMessage;
 import uk.ac.ebi.jmzidml.MzIdentMLElement;
 import uk.ac.ebi.jmzidml.model.mzidml.CvParam;
@@ -70,10 +69,9 @@ public class ProteinDetectionListObjectRule extends AObjectRule<ProteinDetection
      * 
      * @param pdl the ProteinDetectionList element
      * @return collection of messages
-     * @throws ValidatorException validator exception
      */
     @Override
-    public Collection<ValidatorMessage> check(ProteinDetectionList pdl) throws ValidatorException {
+    public Collection<ValidatorMessage> check(ProteinDetectionList pdl) {
         List<ValidatorMessage> messages = new ArrayList<>();
 
         List<ProteinAmbiguityGroup> proteinAmbiguityGroups = pdl.getProteinAmbiguityGroup();

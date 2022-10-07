@@ -8,7 +8,6 @@ import java.util.List;
 import psidev.psi.tools.ontology_manager.OntologyManager;
 import psidev.psi.tools.validator.Context;
 import psidev.psi.tools.validator.MessageLevel;
-import psidev.psi.tools.validator.ValidatorException;
 import psidev.psi.tools.validator.ValidatorMessage;
 import uk.ac.ebi.jmzidml.MzIdentMLElement;
 import uk.ac.ebi.jmzidml.model.mzidml.DBSequence;
@@ -63,10 +62,9 @@ public class PeptideEvidenceObjectRule extends AObjectRule<PeptideEvidence> {
      * 
      * @param pev the PeptideEvidence element
      * @return collection of messages
-     * @throws ValidatorException validator exception
      */
     @Override
-    public Collection<ValidatorMessage> check(PeptideEvidence pev) throws ValidatorException {
+    public Collection<ValidatorMessage> check(PeptideEvidence pev) {
         List<ValidatorMessage> messages = new ArrayList<>();
 
         if (!SearchTypeObjectRule.bIsDeNovoSearch) {
@@ -104,8 +102,6 @@ public class PeptideEvidenceObjectRule extends AObjectRule<PeptideEvidence> {
     
     /**
      * Adds a missing start/end attribute message to the messages collection.
-     * @param pev
-     * @param messages 
      */
     private void addMissingMessageToCollection(PeptideEvidence pev, List<ValidatorMessage> messages) {
         messages.add(new ValidatorMessage("The PeptideEvidence (id='"
@@ -115,8 +111,6 @@ public class PeptideEvidenceObjectRule extends AObjectRule<PeptideEvidence> {
     
     /**
      * Adds a wrong start/end attribute message to the messages collection.
-     * @param pev
-     * @param messages 
      */
     private void addWrongMessageToCollection(PeptideEvidence pev, List<ValidatorMessage> messages) {
         messages.add(new ValidatorMessage("The PeptideEvidence (id='"

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import psidev.psi.tools.ontology_manager.OntologyManager;
-import psidev.psi.tools.validator.ValidatorException;
 import psidev.psi.tools.validator.ValidatorMessage;
 import uk.ac.ebi.jmzidml.model.mzidml.CvParam;
 import uk.ac.ebi.jmzidml.model.mzidml.SpectrumIdentificationList;
@@ -47,10 +46,9 @@ public class SILCheckForFinalPSMListRule extends AObjectRule<SpectrumIdentificat
      * 
      * @param sil the SpectrumIdentificationList element
      * @return collection of messages
-     * @throws ValidatorException validator exception
      */
     @Override
-    public Collection<ValidatorMessage> check(SpectrumIdentificationList sil) throws ValidatorException {
+    public Collection<ValidatorMessage> check(SpectrumIdentificationList sil) {
         List<ValidatorMessage> messages = new ArrayList<>();
 
         for (CvParam cv: sil.getCvParam()) {
@@ -73,8 +71,7 @@ public class SILCheckForFinalPSMListRule extends AObjectRule<SpectrumIdentificat
      */
     @Override
     public Collection<String> getHowToFixTips() {
-        List<String> ret = new ArrayList<>();
 
-        return ret;
+        return new ArrayList<>();
     }
 }

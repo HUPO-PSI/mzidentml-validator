@@ -8,10 +8,10 @@ import psidev.psi.pi.rulefilter.jaxb.UserOption;
 /**
  * Interface that provides the methods to implement that parse rule filter xml
  * files. That files follow the xsd schema located at:
- * http://proteo.cnb.csic.es/miape-api/schemas/ruleFilter_v1.4.xsd
- * 
+ * <a href="http://proteo.cnb.csic.es/miape-api/schemas/ruleFilter_v1.4.xsd">...</a>
+ *
  * @author Salva
- * 
+ *
  */
 public interface RuleFilterAgent {
     /**
@@ -22,6 +22,6 @@ public interface RuleFilterAgent {
      *         {@link UserCondition} and the value is the identifier of the
      *         chosen {@link UserOption}
      */
-    public HashMap<String, String> getSelectedOptions();
+    HashMap<String, String> getSelectedOptions();
 
 }

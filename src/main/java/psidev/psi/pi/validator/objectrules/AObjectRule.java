@@ -15,7 +15,7 @@ import psidev.psi.tools.validator.rules.codedrule.ObjectRule;
  * @author Gerhard Mayer
  * @param <T> type of jmzIdentML object
  */
-public abstract class AObjectRule<T extends Object> extends ObjectRule<T> {
+public abstract class AObjectRule<T> extends ObjectRule<T> {
 
     /**
      * Constants.
@@ -186,20 +186,7 @@ public abstract class AObjectRule<T extends Object> extends ObjectRule<T> {
 D     */
     protected HashMap<String, String> getTermChildren(String termID, String ontology) {
         HashMap<String, String> retMap = new HashMap<>();
-        
-        /*
-        try {
-        Query olsQuery = new QueryServiceLocator().getOntologyQuery();
-        @SuppressWarnings("unchecked")
-        HashMap<String, String> terms = olsQuery.getTermChildren(termID, ontology, -1, null);
-        if (terms != null){
-        retMap.putAll(terms);
-        }
-        }
-        catch (ServiceException | RemoteException ex) {
-        ex.printStackTrace(System.err);
-        }
-         */
+
         // Quick and dirty hardcoded hack - replace later by OLS REST API calls
         switch (termID) {
             case "MS:1001143":
@@ -213,12 +200,7 @@ D     */
         }
      
         // TODO: Use the new OLS REST API
-        /*
-        String olsAPIStr = AObjectRule.urlEncode(termID);
-        String response = this.restClient.callGET(olsAPIStr);
-        // TODO: parse the response and fill the map with the child terms from the response
-        */
-        
+
         return retMap;
     }
     

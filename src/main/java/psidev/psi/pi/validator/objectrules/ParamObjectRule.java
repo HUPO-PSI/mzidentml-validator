@@ -7,7 +7,6 @@ import psidev.psi.pi.validator.objectrules.util.OBOFileReader;
 import psidev.psi.tools.ontology_manager.OntologyManager;
 import psidev.psi.tools.validator.Context;
 import psidev.psi.tools.validator.MessageLevel;
-import psidev.psi.tools.validator.ValidatorException;
 import psidev.psi.tools.validator.ValidatorMessage;
 import uk.ac.ebi.jmzidml.MzIdentMLElement;
 import uk.ac.ebi.jmzidml.model.mzidml.CvParam;
@@ -79,10 +78,9 @@ public class ParamObjectRule extends AObjectRule<Param> {
      * 
      * @param param the Param element
      * @return collection of messages
-     * @throws ValidatorException validator exception
      */
     @Override
-    public Collection<ValidatorMessage> check(Param param) throws ValidatorException {
+    public Collection<ValidatorMessage> check(Param param) {
         List<ValidatorMessage> messages = new ArrayList<>();
         
         CvParam cvParam = param.getCvParam();
@@ -116,7 +114,6 @@ public class ParamObjectRule extends AObjectRule<Param> {
 
    /**
      * Gets the validator message for an empty CV accession.
-     * @param cvName
      * @return the ValidatorMessage
      */
     private ValidatorMessage getEmptyAccessionMsg(String cvName) {
@@ -128,7 +125,6 @@ public class ParamObjectRule extends AObjectRule<Param> {
     
    /**
      * Gets the validator message for a wrong CV term name.
-     * @param cvParam
      * @param ontID     the ontology ID
      * @param termID    the CV term ID
      * @return the ValidatorMessage
@@ -142,7 +138,6 @@ public class ParamObjectRule extends AObjectRule<Param> {
     
    /**
      * Gets the validator message for a wrong CV term name.
-     * @param cvParam
      * @return the ValidatorMessage
      */
     private ValidatorMessage getMissingCVTermValueMsg(CvParam cvParam) {

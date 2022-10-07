@@ -7,7 +7,6 @@ import java.util.List;
 import psidev.psi.tools.ontology_manager.OntologyManager;
 import psidev.psi.tools.validator.Context;
 import psidev.psi.tools.validator.MessageLevel;
-import psidev.psi.tools.validator.ValidatorException;
 import psidev.psi.tools.validator.ValidatorMessage;
 import uk.ac.ebi.jmzidml.MzIdentMLElement;
 import uk.ac.ebi.jmzidml.model.mzidml.CvParam;
@@ -70,10 +69,9 @@ public class XLinkPeptideModificationObjectRule extends AObjectRule<Peptide> {
      * 
      * @param pept the Peptide element
      * @return collection of messages
-     * @throws ValidatorException validator exception
      */
     @Override
-    public Collection<ValidatorMessage> check(Peptide pept) throws ValidatorException {
+    public Collection<ValidatorMessage> check(Peptide pept) {
         List<ValidatorMessage> messages = new ArrayList<>();
         
         if (AdditionalSearchParamsObjectRule.bIsCrossLinkingSearch) {
@@ -81,8 +79,6 @@ public class XLinkPeptideModificationObjectRule extends AObjectRule<Peptide> {
                 for (CvParam cv: mod.getCvParam()) {
                     switch (cv.getAccession()) {
                         case ACC_XL_DONOR:      // cross-link donor
-                            this.checkForEmptyCVValueAndFillMap(pept, mod, cv, messages);
-                            break;
                         case ACC_XL_RECEIVER:   // cross-link acceptor
                             this.checkForEmptyCVValueAndFillMap(pept, mod, cv, messages);
                             break;
@@ -96,10 +92,6 @@ public class XLinkPeptideModificationObjectRule extends AObjectRule<Peptide> {
 
     /**
      * Checks, if the CV value is empty and fills the data map.
-     * @param pept
-     * @param mod
-     * @param cv
-     * @param messages 
      */
     private void checkForEmptyCVValueAndFillMap(Peptide pept, Modification mod, CvParam cv, List<ValidatorMessage> messages) {
         String cvValue = cv.getValue();
@@ -141,7 +133,6 @@ public class XLinkPeptideModificationObjectRule extends AObjectRule<Peptide> {
         
     /**
      * Checks, if 'cross-link donor' and 'cross-link acceptor' are always paired correctly.
-     * @param messages 
      */
     private static void checkForPairedDonorReceiverPairs(Collection<ValidatorMessage> messages) {
         ValidatorMessage valMsg;
@@ -190,7 +181,6 @@ public class XLinkPeptideModificationObjectRule extends AObjectRule<Peptide> {
 
     /**
      * Gets the list of Peptide ID's.
-     * @param acc2PeptIDMap
      * @return String
      */
     private static String getPeptideIDList(HashMap<String, String> acc2PeptIDMap) {

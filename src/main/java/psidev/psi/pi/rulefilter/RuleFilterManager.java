@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Set;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+
+import psidev.psi.pi.rulefilter.jaxb.MandatoryElement;
 import psidev.psi.pi.rulefilter.jaxb.RuleFilter;
 import psidev.psi.pi.rulefilter.jaxb.RuleToSkip;
 import psidev.psi.pi.rulefilter.jaxb.UserCondition;
@@ -81,9 +83,7 @@ public class RuleFilterManager {
         List<String> ret = new ArrayList<>();
         
         if (this.filter.getMandatoryElements() != null) {
-            this.filter.getMandatoryElements().getMandatoryElement().stream().map((mandatoryElement) -> mandatoryElement.getElement()).filter((mzIdentMLElement) -> (!mzIdentMLElement.isEmpty())).forEach((mzIdentMLElement) -> {
-                ret.add(mzIdentMLElement);
-            });
+            this.filter.getMandatoryElements().getMandatoryElement().stream().map(MandatoryElement::getElement).filter((mzIdentMLElement) -> (!mzIdentMLElement.isEmpty())).forEach(ret::add);
         }
         
         return ret;
@@ -92,26 +92,17 @@ public class RuleFilterManager {
     /**
      * Gets the rules to skip.
      * 
-     * @param userCondition
-     * @param optionId
      * @return List<>
      */
     private List<RuleToSkip> getRulesToSkip(UserCondition userCondition, String optionId) {
         List<RuleToSkip> locRulesToSkip = new ArrayList<>();
         
         if (optionId != null) {
-            userCondition.getUserOption().stream().filter((option) -> (option.getId().equals(optionId))).map((option) -> {
+            userCondition.getUserOption().stream().filter((option) -> (option.getId().equals(optionId))).peek((option) -> {
                 if (option.getRuleToSkip() != null) {
                     locRulesToSkip.addAll(option.getRuleToSkip());
                 }
-                return option;
-            }).filter((option) -> (option.getRulesToSkipRef() != null)).forEach((option) -> {
-                option.getRulesToSkipRef().stream().filter((rulesToSkipRef) -> (this.filter.getReferences() != null && this.filter.getReferences().getReferencedRules() != null)).forEach((rulesToSkipRef) -> {
-                    this.filter.getReferences().getReferencedRules().stream().filter((referencedRuleSet) -> (referencedRuleSet.getId().equals(rulesToSkipRef.getRef()))).forEach((referencedRuleSet) -> {
-                        locRulesToSkip.addAll(referencedRuleSet.getRuleToSkip());
-                    });
-                });
-            });
+            }).filter((option) -> (option.getRulesToSkipRef() != null)).forEach((option) -> option.getRulesToSkipRef().stream().filter((rulesToSkipRef) -> (this.filter.getReferences() != null && this.filter.getReferences().getReferencedRules() != null)).forEach((rulesToSkipRef) -> this.filter.getReferences().getReferencedRules().stream().filter((referencedRuleSet) -> (referencedRuleSet.getId().equals(rulesToSkipRef.getRef()))).forEach((referencedRuleSet) -> locRulesToSkip.addAll(referencedRuleSet.getRuleToSkip()))));
         }
 
         return locRulesToSkip;
@@ -120,7 +111,6 @@ public class RuleFilterManager {
     /**
      * Gets the rule condition.
      * 
-     * @param conditionId
      * @return UserCondition
      */
     private UserCondition getCondition(String conditionId) {
@@ -149,13 +139,11 @@ public class RuleFilterManager {
     private Set<String> getRulesToSkipByUserOptions(HashMap<String, String> selectedOptions) {
         Set<String> ret = new HashSet<>();
 
-        selectedOptions.keySet().stream().forEach((conditionId) -> {
+        selectedOptions.keySet().forEach((conditionId) -> {
             UserCondition condition = this.getCondition(conditionId);
             if (condition != null) {
                 List<RuleToSkip> rules = this.getRulesToSkip(condition, selectedOptions.get(conditionId));
-                rules.stream().forEach((objectRule) -> {
-                    ret.add(objectRule.getId());
-                });
+                rules.forEach((objectRule) -> ret.add(objectRule.getId()));
             }
         });
 
@@ -164,19 +152,13 @@ public class RuleFilterManager {
 
     /**
      * 
-     * @param ruleId
-     * @param valid
      * @return List<>
      */
     private List<String> getRulesToSkipByRuleId(String ruleId, boolean valid) {
         List<String> ret = new ArrayList<>();
 
         if (this.filter.getRuleConditions() != null) {
-            this.filter.getRuleConditions().getRuleCondition().stream().filter((objectRuleCondition) -> (objectRuleCondition.getId().equals(ruleId))).filter((objectRuleCondition) -> ((valid && objectRuleCondition.isValid()) || (!valid && !objectRuleCondition.isValid()))).forEach((objectRuleCondition) -> {
-                objectRuleCondition.getRuleToSkip().stream().forEach((objectRule) -> {
-                    ret.add(objectRule.getId());
-                });
-            });
+            this.filter.getRuleConditions().getRuleCondition().stream().filter((objectRuleCondition) -> (objectRuleCondition.getId().equals(ruleId))).filter((objectRuleCondition) -> ((valid && objectRuleCondition.isValid()) || (!valid && !objectRuleCondition.isValid()))).forEach((objectRuleCondition) -> objectRuleCondition.getRuleToSkip().forEach((objectRule) -> ret.add(objectRule.getId())));
         }
         
         return ret;
@@ -184,13 +166,10 @@ public class RuleFilterManager {
 
     /**
      * Add a collection of rules identifiers to the list of rules to skip
-     * 
-     * @param objectRulesIdentifiers
+     *
      */
     private void addRulesToSkip(Collection<String> objectRulesIdentifiers) {
-        objectRulesIdentifiers.stream().filter((objectRuleIdentifier) -> (!this.rulesToSkip.contains(objectRuleIdentifier))).forEach((objectRuleIdentifier) -> {
-            this.rulesToSkip.add(objectRuleIdentifier);
-        });
+        objectRulesIdentifiers.stream().filter((objectRuleIdentifier) -> (!this.rulesToSkip.contains(objectRuleIdentifier))).forEach((objectRuleIdentifier) -> this.rulesToSkip.add(objectRuleIdentifier));
     }
 
     /**
@@ -247,7 +226,7 @@ public class RuleFilterManager {
         // for each message, check if the rule that generated it is in the list of rules to skip
         if (msgs != null && !msgs.isEmpty()) {
             List<String> skipList = this.getRulesToSkipList();                
-            msgs.keySet().stream().forEach((ruleIdentifier) -> {
+            msgs.keySet().forEach((ruleIdentifier) -> {
                 // if the rule that generated the messages is in the list of rules to skip, not add to the final message list
                 if (skipList.contains(ruleIdentifier)) {
                     // move the rule to the list of non checked rules
@@ -268,42 +247,17 @@ public class RuleFilterManager {
     public void printRuleFilter() {
         for (UserCondition condition : this.filter.getUserConditions().getUserCondition()) {
             System.out.println(NEW_LINE + "Condition: " + condition.getId());
-            condition.getUserOption().stream().map((option) -> {
-                System.out.println(this.TAB + "Option " + option.getId());
-                return option;
-            }).map((option) -> {
-                option.getRuleToSkip().stream().forEach((rule) -> {
-                    System.out.println(this.DOUBLE_TAB + "rule id: " + rule.getId());
-                });
-                return option;
-            }).filter((option) -> (option.getRulesToSkipRef() != null)).forEach((option) -> {
-                option.getRulesToSkipRef().stream().filter((ruleSetReference) -> (this.filter.getReferences() != null)).forEach((ruleSetReference) -> {
-                    this.filter.getReferences().getReferencedRules().stream().filter((referencedRuleSet) -> (referencedRuleSet.getId().equals(ruleSetReference.getRef()))).forEach((referencedRuleSet) -> {
-                        referencedRuleSet.getRuleToSkip().stream().forEach((rule) -> {
-                            System.out.println(this.DOUBLE_TAB + "mapping rule id: " + rule.getId());
-                        });
-                    });
-                });
-            });
+            condition.getUserOption().stream().peek((option) -> System.out.println(this.TAB + "Option " + option.getId())).peek((option) -> option.getRuleToSkip().forEach((rule) -> System.out.println(this.DOUBLE_TAB + "rule id: " + rule.getId()))).filter((option) -> (option.getRulesToSkipRef() != null)).forEach((option) -> option.getRulesToSkipRef().stream().filter((ruleSetReference) -> (this.filter.getReferences() != null)).forEach((ruleSetReference) -> this.filter.getReferences().getReferencedRules().stream().filter((referencedRuleSet) -> (referencedRuleSet.getId().equals(ruleSetReference.getRef()))).forEach((referencedRuleSet) -> referencedRuleSet.getRuleToSkip().forEach((rule) -> System.out.println(this.DOUBLE_TAB + "mapping rule id: " + rule.getId())))));
         }
         
         if (this.filter.getRuleConditions() != null) {
             System.out.println(NEW_LINE + "ObjectRuleConditions:");
-            this.filter.getRuleConditions().getRuleCondition().stream().map((ruleCondition) -> {
-                System.out.println(this.TAB + "Rule condition: " + ruleCondition.getId() + " isValid: " + ruleCondition.isValid());
-                return ruleCondition;
-            }).forEach((ruleCondition) -> {
-                ruleCondition.getRuleToSkip().stream().forEach((objectRule) -> {
-                    System.out.println(this.DOUBLE_TAB + "rule to skip: " + objectRule.getId());
-                });
-            });
+            this.filter.getRuleConditions().getRuleCondition().stream().peek((ruleCondition) -> System.out.println(this.TAB + "Rule condition: " + ruleCondition.getId() + " isValid: " + ruleCondition.isValid())).forEach((ruleCondition) -> ruleCondition.getRuleToSkip().forEach((objectRule) -> System.out.println(this.DOUBLE_TAB + "rule to skip: " + objectRule.getId())));
         }
         
         if (this.filter.getMandatoryElements() != null) {
             System.out.println(NEW_LINE + "Mandatory elements:");
-            this.filter.getMandatoryElements().getMandatoryElement().stream().forEach((mandatorymzMLElement) -> {
-                System.out.println(this.TAB + "Mandatory element: " + mandatorymzMLElement.getElement());
-            });
+            this.filter.getMandatoryElements().getMandatoryElement().forEach((mandatorymzMLElement) -> System.out.println(this.TAB + "Mandatory element: " + mandatorymzMLElement.getElement()));
         }
     }
 }

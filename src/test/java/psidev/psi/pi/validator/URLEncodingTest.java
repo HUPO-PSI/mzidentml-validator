@@ -1,6 +1,5 @@
 package psidev.psi.pi.validator;
 
-import java.util.List;
 import org.apache.log4j.Logger;
 
 
@@ -56,9 +55,5 @@ public class URLEncodingTest {
         String olsAPIStr = AObjectRule.urlEncode("1001143");
         URLEncodingTest.LOGGER.debug("olsAPIStr: " + olsAPIStr);
 
-        /*
-        String response = restClient.callGET(olsAPIStr);
-        URLEncodingTest.LOGGER.debug(response);
-        */
     }
 }

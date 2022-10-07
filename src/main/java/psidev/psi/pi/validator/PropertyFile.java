@@ -2,7 +2,6 @@ package psidev.psi.pi.validator;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -40,12 +39,8 @@ public class PropertyFile {
             try (FileInputStream propFile = new FileInputStream(filepath)) {
                 this.props.load(propFile);
             }
-        }
-        catch (FileNotFoundException fnfexc) {
+        } catch (IOException fnfexc) {
             fnfexc.printStackTrace(System.err);
-        }
-        catch (IOException ioexc) {
-            ioexc.printStackTrace(System.err);
         }
 
         return this.props;

@@ -1,7 +1,6 @@
 package psidev.psi.pi.validator;
 
 import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import psidev.psi.tools.validator.MessageLevel;
 import psidev.psi.tools.validator.ValidatorMessage;
@@ -61,20 +60,17 @@ public class MzIdentMLValidationErrorHandler implements ErrorHandler {
      *
      * @param exception The error information encapsulated in a
      *                  SAX parse exception.
-     * @throws org.xml.sax.SAXException Any SAX exception, possibly
-     *                                  wrapping another exception.
      * @see org.xml.sax.SAXParseException
      */
     @Override
-    public void error(SAXParseException exception) throws SAXException {
-        StringBuilder sb = new StringBuilder();
+    public void error(SAXParseException exception) {
+
+        String sb = "Non-fatal XML Parsing error detected on line " +
+                exception.getLineNumber() +
+                this.NEW_LINE + "  Error message: " +
+                exception.getMessage();
         
-        sb.append("Non-fatal XML Parsing error detected on line ")
-            .append(exception.getLineNumber())
-            .append(this.NEW_LINE).append("  Error message: ")
-            .append(exception.getMessage());
-        
-        this.errorMessages.add(new ValidatorMessage(sb.toString(), MessageLevel.ERROR));
+        this.errorMessages.add(new ValidatorMessage(sb, MessageLevel.ERROR));
     }
 
     /**
@@ -91,20 +87,17 @@ public class MzIdentMLValidationErrorHandler implements ErrorHandler {
      *
      * @param exception The error information encapsulated in a
      *                  SAX parse exception.
-     * @throws org.xml.sax.SAXException Any SAX exception, possibly
-     *                                  wrapping another exception.
      * @see org.xml.sax.SAXParseException
      */
     @Override
-    public void fatalError(SAXParseException exception) throws SAXException {
-        StringBuilder sb = new StringBuilder();
+    public void fatalError(SAXParseException exception) {
+
+        String sb = "FATAL XML Parsing error detected on line " +
+                exception.getLineNumber() +
+                this.NEW_LINE + "  Fatal Error message: " +
+                exception.getMessage();
         
-        sb.append("FATAL XML Parsing error detected on line ")
-            .append(exception.getLineNumber())
-            .append(this.NEW_LINE).append("  Fatal Error message: ")
-            .append(exception.getMessage());
-        
-        this.errorMessages.add(new ValidatorMessage(sb.toString(), MessageLevel.FATAL));
+        this.errorMessages.add(new ValidatorMessage(sb, MessageLevel.FATAL));
     }
 
     /**
@@ -148,18 +141,15 @@ public class MzIdentMLValidationErrorHandler implements ErrorHandler {
      *
      * @param exception The warning information encapsulated in a
      *                  SAX parse exception.
-     * @throws org.xml.sax.SAXException Any SAX exception, possibly
-     *                                  wrapping another exception.
      * @see org.xml.sax.SAXParseException SAX parsing exception
      */
     @Override
-    public void warning(SAXParseException exception) throws SAXException {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Warning: Validation of the XMl has detected the following condition on line ")
-            .append(exception.getLineNumber())
-            .append(this.NEW_LINE).append("  Warning message: ")
-            .append(exception.getMessage());
+    public void warning(SAXParseException exception) {
+        String sb = "Warning: Validation of the XMl has detected the following condition on line " +
+                exception.getLineNumber() +
+                this.NEW_LINE + "  Warning message: " +
+                exception.getMessage();
         
-        this.errorMessages.add(new ValidatorMessage(sb.toString(), MessageLevel.WARN));
+        this.errorMessages.add(new ValidatorMessage(sb, MessageLevel.WARN));
     }
 }

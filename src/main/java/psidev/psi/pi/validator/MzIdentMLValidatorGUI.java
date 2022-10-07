@@ -6,7 +6,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -188,11 +187,7 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
 
         jButtonBrowse.setText("Browse...");
         jButtonBrowse.setToolTipText("Browse for .mzid files ...");
-        jButtonBrowse.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonBrowseActionPerformed(evt);
-            }
-        });
+        jButtonBrowse.addActionListener(this::jButtonBrowseActionPerformed);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -412,11 +407,7 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
         jComboValidationType.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "MIAPE-compliant validation", "Semantic validation" }));
         jComboValidationType.setSelectedIndex(1);
         jComboValidationType.setToolTipText("Select the type of validation");
-        jComboValidationType.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jComboValidationTypeActionPerformed(evt);
-            }
-        });
+        jComboValidationType.addActionListener(this::jComboValidationTypeActionPerformed);
 
         jCheckBoxSkipSchemaValidation.setText("Skip schema validation");
         jCheckBoxSkipSchemaValidation.setToolTipText("<html>Select this option in order to skip schema validation.<br>\nThe schema validation can take a lot of time for large input files,<br> so it can be avoided by selecting this option.</html>");
@@ -469,11 +460,7 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
 
         jButtonValidate.setText("Validate!");
         jButtonValidate.setToolTipText("Start the validation process");
-        jButtonValidate.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonValidateActionPerformed(evt);
-            }
-        });
+        jButtonValidate.addActionListener(this::jButtonValidateActionPerformed);
 
         jLabelSpinner.setText("<html>maximum number of reported identical messages:</html>");
 
@@ -558,8 +545,7 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
     }
     
     /**
-     * 
-     * @param evt 
+     *
      */
     private void jComboValidationTypeActionPerformed(java.awt.event.ActionEvent evt) {
         if (this.isMIAPEValidationSelected()) {
@@ -572,7 +558,6 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
 
     /**
      * Enable all radio buttons.
-     * @param b 
      */
     private void enableRadioButtons(boolean b) {
         this.jRadioPFF.setEnabled(b);
@@ -606,16 +591,14 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
     }
 
     /**
-     * 
-     * @param evt 
+     *
      */
     private void jButtonBrowseActionPerformed(ActionEvent evt) {
         this.selectFile();
     }
 
     /**
-     * 
-     * @param evt 
+     *
      */
     private void jButtonValidateActionPerformed(ActionEvent evt) {
         // Check input file.
@@ -761,7 +744,7 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
                             try {
                                 this.validator = new MzIdentMLValidator(isOntology, MzIdentMLValidatorGUI.this);
                             }
-                            catch (OntologyLoaderException | FileNotFoundException | ValidatorException | CvRuleReaderException exc) {
+                            catch (OntologyLoaderException exc) {
                                 exc.printStackTrace(System.err);
                             }
                             isOntology.close();
@@ -771,7 +754,7 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
                         }
                     }
                 }
-                catch (IOException | OntologyLoaderException | ValidatorException | CvRuleReaderException e) {
+                catch (IOException | OntologyLoaderException e) {
                     e.printStackTrace(System.err);
                     notifyOfError(e);
                 }
@@ -791,7 +774,6 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
      * 
      * @param ontologyPropertyName can take the values: ontologies.file or local.ontologies.file
      * @return InputStream for the ontologies file
-     * @throws FileNotFoundException
      */
     private InputStream getOntologiesFileInputStream(String ontologyPropertyName) throws IOException {
         String ontologiesFile = MzIdentMLValidatorGUI.STR_RESOURCE_FOLDER + MzIdentMLValidatorGUI.getProperty(ontologyPropertyName);
@@ -812,9 +794,8 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
      * Note: If found in the folder where application has launched it overrides the default files.
      * 
      * @return InputStream for the MIAPE rule filter file
-     * @throws FileNotFoundException
      */
-    private InputStream getMIAPEValidationRuleFilterInputStream() throws FileNotFoundException {
+    private InputStream getMIAPEValidationRuleFilterInputStream() throws IOException {
         String ruleFilterFileName = MzIdentMLValidatorGUI.STR_RESOURCE_FOLDER + MzIdentMLValidatorGUI.getProperty("miape.filter.rule.file");
         File file = new File(ruleFilterFileName);
 
@@ -824,7 +805,7 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
             return this.cl.getResourceAsStream(ruleFilterFileName);
         }
 
-        return new FileInputStream(file);
+        return Files.newInputStream(file.toPath());
     }
 
     /**
@@ -833,7 +814,6 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
      * the default files.
      * 
      * @return InputStream for the rule filter filer
-     * @throws FileNotFoundException
      */
     private InputStream getSemanticValidationRuleFilterInputStream() throws IOException {
         String ruleFilterFileName = MzIdentMLValidatorGUI.STR_RESOURCE_FOLDER +  MzIdentMLValidatorGUI.getProperty("semantic.filter.rule.file");
@@ -875,7 +855,7 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
      * @return InputStream for the rule file
      * @throws FileNotFoundException file not found exception
      */
-    public InputStream getRuleFileInputStream(MzIdVersion mzIdVersion, String ruleKind) throws FileNotFoundException {
+    public InputStream getRuleFileInputStream(MzIdVersion mzIdVersion, String ruleKind) throws IOException {
         String propertyName = ruleKind;
         String ruleFile = this.STR_EMPTY;
         
@@ -921,7 +901,7 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
                 MzIdentMLValidatorGUI.LOGGER.debug(ruleKind + "RuleFile does not exist: " + ruleFile);
                 return this.cl.getResourceAsStream(ruleFile);
             }
-            return new FileInputStream(file);
+            return Files.newInputStream(file.toPath());
         }
     }
     
@@ -948,25 +928,8 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
      */
     public static String getProperty(String propertyName) {
         // TODO: What is wrong here?
-        /*
-        InputStream is = MzIdentMLValidatorGUI.class.getClassLoader().getResourceAsStream(MzIdentMLValidatorGUI.STR_RESOURCE_FOLDER + MzIdentMLValidatorGUI.STR_VALIDATION_PROPERTIES);
-        if (is == null) {
-            MzIdentMLValidatorGUI.LOGGER.error(MzIdentMLValidatorGUI.STR_VALIDATION_PROPERTIES + " file not found");
-            System.exit(EXIT_FAILURE);
-        }
 
-        Properties properties = new Properties();
-        try {
-            properties.load(is);
-            is.close();
-        }
-        catch (IOException e) {
-            e.printStackTrace(System.err);
-            throw new IllegalArgumentException(e);
-        }
-        */
 
-        
         PropertyFile propFile = new PropertyFile();
         MzIdentMLValidatorGUI.LOGGER.debug("Resources: " + MzIdentMLValidatorGUI.STR_RESOURCE_FOLDER);
         Properties properties = propFile.loadProperties(MzIdentMLValidatorGUI.STR_RESOURCE_FOLDER + MzIdentMLValidatorGUI.STR_VALIDATION_PROPERTIES);
@@ -977,7 +940,6 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
 
     /**
      * Does the finalization work after validataion.
-     * @param validator
      */
     private void validationDone(MzIdentMLValidator validator) {
         this.jProgressBar.setValue(this.jProgressBar.getMaximum());
@@ -1117,9 +1079,6 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
                 if (!AdditionalSearchParamsObjectRule.bIsPeptideLevelScoring) {
                     switch (ruleID) {
                         case "PeptideLevelStatsSpectrumIdentificationItem_may_rule":
-                            report.getInvalidCvRules().remove(ruleID);
-                            bAdd = false;
-                            break;
                         case "PeptideLevelStatsSearchType_may_rule":
                             report.getInvalidCvRules().remove(ruleID);
                             bAdd = false;
@@ -1133,9 +1092,6 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
                 if (!AdditionalSearchParamsObjectRule.bIsModificationLocalizationScoring) {
                     switch (ruleID) {
                         case "ModLocalizationSearchType_may_rule":
-                            report.getInvalidCvRules().remove(ruleID);
-                            bAdd = false;
-                            break;
                         case "ModLocalizationSpectrumIdentificationItem_must_rule":
                             report.getInvalidCvRules().remove(ruleID);
                             bAdd = false;
@@ -1149,17 +1105,11 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
                 if (!AdditionalSearchParamsObjectRule.bIsCrossLinkingSearch) {
                     switch (ruleID) {
                         case "CrosslinkingSearchType_may_rule":
-                            report.getInvalidCvRules().remove(ruleID);
-                            bAdd = false;
-                            break;
                         case "CrosslinkingPeptideModification_may_rule":
                             report.getInvalidCvRules().remove(ruleID);
                             bAdd = false;
                             break;
                         case "XLinkPeptideModificationObjectRule":
-                            report.getObjectRulesInvalid().remove(report.getObjectRuleById(ruleID));
-                            bAdd = false;
-                            break;
                         case "XLinkSIIObjectRule":
                             report.getObjectRulesInvalid().remove(report.getObjectRuleById(ruleID));
                             bAdd = false;
@@ -1169,59 +1119,23 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
                 if (!AdditionalSearchParamsObjectRule.bIsProteoGenomicsSearch) {
                     switch (ruleID) {
                         case "ProteogenomicsSearchType_may_rule":
-                            report.getInvalidCvRules().remove(ruleID);
-                            bAdd = false;
-                            break;
+                        case "ProteogenomicsPeptideEvidence_unmapped_may_rule":
+                        case "ProteogenomicsPeptideEvidence_may_rule":
+                        case "ProteogenomicsDBSequence_unmapped_may_rule":
                         case "ProteogenomicsDBSequence_may_rule":
                             report.getInvalidCvRules().remove(ruleID);
                             bAdd = false;
                             break;
-                        case "ProteogenomicsDBSequence_unmapped_may_rule":
-                            report.getInvalidCvRules().remove(ruleID);
-                            bAdd = false;
-                            break;
-                        case "ProteogenomicsPeptideEvidence_may_rule":
-                            report.getInvalidCvRules().remove(ruleID);
-                            bAdd = false;
-                            break;
-                        case "ProteogenomicsPeptideEvidence_unmapped_may_rule":
-                            report.getInvalidCvRules().remove(ruleID);
-                            bAdd = false;
-                            break;
                         case "ProteoGenomicsPeptEvObjectRule":
-                            report.getObjectRulesInvalid().remove(report.getObjectRuleById(ruleID));
-                            bAdd = false;
-                            break;
                         case "ProteoGenomicsDBSeqObjectRule":
                             report.getObjectRulesInvalid().remove(report.getObjectRuleById(ruleID));
                             bAdd = false;
                             break;
                     }
                 }
-                /*
-                if (!AdditionalSearchParamsObjectRule.bIsSamplePreFractionation) {
-                    // TODO: implement
-                }
-                if (!AdditionalSearchParamsObjectRule.bIsConsensusScoring) {
-                    // TODO: implement
-                }
-                */
 
                 // Quick and dirty hack for ProteinDetectionList_must_rule
                 // MS:1002404 (count of identified proteins), see GitHub Issue #94
-                /*
-                if (MzIdentMLValidator.currentFileVersion == MzIdentMLValidator.MzIdVersion._1_2) {
-                    MzIdentMLValidatorGUI.LOGGER.debug("ruleID: " + ruleID);
-                    if (ProteinDetectionListObjectRule.bContainsCountsOfIdentifiedProteins) {
-                        switch (ruleID) {
-                            case "ProteinDetectionList_must_rule":
-                                report.getInvalidCvRules().remove(ruleID);
-                                bAdd = false;
-                                break;
-                        }
-                    }
-                }
-                */
 
                 if (bAdd) {
                     filteredMsgs.add(msg);
@@ -1237,8 +1151,6 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
 
     /**
      * Shows the messages.
-     * @param showStatistics 
-     * @param validator 
      * @return int
      */
     private int showMessages(boolean showStatistics, MzIdentMLValidator validator) {
@@ -1300,9 +1212,6 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
     
     /**
      * Appends a coloured message text to the TextPane.
-     * @param txtPane
-     * @param msg
-     * @param color 
      */
     private void appendMsgToTextPane(JTextPane txtPane, String msg, Color color)
     {
@@ -1320,67 +1229,44 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
     
     /**
      * Gets a string containing all validator messages sorted according to the MessageLevel.
-     * @param aMessages
-     * @param count
      * @return String of validator messages
      */
     private String getRedSortedValidatorMessages(Collection<ValidatorMessage> aMessages, MutableInt count) {
-        StringBuilder strB = new StringBuilder();
-        
-        strB.append(this.getValidatorMessages(aMessages, MessageLevel.FATAL, count));
-        strB.append(this.getValidatorMessages(aMessages, MessageLevel.ERROR, count));
-        
-        return strB.toString();
+
+        return this.getValidatorMessages(aMessages, MessageLevel.FATAL, count) +
+                this.getValidatorMessages(aMessages, MessageLevel.ERROR, count);
     }
     
     /**
      * Gets a string containing all validator messages sorted according to the MessageLevel.
-     * @param aMessages
-     * @param count
      * @return String of validator messages
      */
     private String getOrangeSortedValidatorMessages(Collection<ValidatorMessage> aMessages, MutableInt count) {
-        StringBuilder strB = new StringBuilder();
-        
-        strB.append(this.getValidatorMessages(aMessages, MessageLevel.WARN, count));
-        
-        return strB.toString();
+
+        return this.getValidatorMessages(aMessages, MessageLevel.WARN, count);
     }
     
     /**
      * Gets a string containing all validator messages sorted according to the MessageLevel.
-     * @param aMessages
-     * @param count
      * @return String of validator messages
      */
     private String getGreenSortedValidatorMessages(Collection<ValidatorMessage> aMessages, MutableInt count) {
-        StringBuilder strB = new StringBuilder();
-        
-        strB.append(this.getValidatorMessages(aMessages, MessageLevel.INFO, count));
-        strB.append(this.getValidatorMessages(aMessages, MessageLevel.DEBUG, count));
-        
-        return strB.toString();
+
+        return this.getValidatorMessages(aMessages, MessageLevel.INFO, count) +
+                this.getValidatorMessages(aMessages, MessageLevel.DEBUG, count);
     }
 
     /**
      * Gets a string containing all validator messages sorted according to the MessageLevel.
-     * @param aMessages
-     * @param count
      * @return String of validator messages
      */
     private String getBlackSortedValidatorMessages(Collection<ValidatorMessage> aMessages, MutableInt count) {
-        StringBuilder strB = new StringBuilder();
-        
-        strB.append(this.getValidatorMessages(aMessages, MessageLevel.SUCCESS, count));
-        
-        return strB.toString();
+
+        return this.getValidatorMessages(aMessages, MessageLevel.SUCCESS, count);
     }
 
     /**
      * Gets a string containing all validator messages for a given MessageLevel.
-     * @param aMessages
-     * @param specLevel
-     * @param count
      * @return String of validator messages
      */
     private String getValidatorMessages(Collection<ValidatorMessage> aMessages, MessageLevel specLevel, MutableInt count) {
@@ -1401,9 +1287,7 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
             }
             sb.append(MzIdentMLValidatorGUI.this.STR_4_INDENTATION).append("--> ").append(message.getMessage()).append(NEW_LINE);
             if (rule != null && rule.getHowToFixTips() != null) {
-                rule.getHowToFixTips().stream().forEach((howToFixTip) -> {
-                    sb.append(MzIdentMLValidatorGUI.this.STR_4_INDENTATION).append("Tip: ").append(howToFixTip).append(NEW_LINE);
-                });
+                rule.getHowToFixTips().forEach((howToFixTip) -> sb.append(MzIdentMLValidatorGUI.this.STR_4_INDENTATION).append("Tip: ").append(howToFixTip).append(NEW_LINE));
             }
         }); // only get messages that have the same message level as selected by the user
 
@@ -1412,8 +1296,6 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
 
     /**
      * Set the color flags from the rule.
-     * @param rule 
-     * @param msgLevel 
      */
     private void setFlagsFromRule(Rule rule, MessageLevel msgLevel) {
         if (rule instanceof CvRule) {
@@ -1548,7 +1430,6 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
     
     /**
      * Get the FileChooser.
-     * @param title
      * @return the JFileChooser object
      */
     private JFileChooser getFileChooser(String title) {
@@ -1561,16 +1442,12 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
         jfc.setFileFilter(new FileFilter() {
             @Override
             public boolean accept(File f) {
-                boolean result = false;
-                if (f.isDirectory()
+                return f.isDirectory()
                         || f.getName().toLowerCase().endsWith(STR_FILE_EXT_MZID)
                         || f.getName().toLowerCase().endsWith(STR_FILE_EXT_MZID_GZ)
                         || f.getName().toLowerCase().endsWith(STR_FILE_EXT_MZID_ZIP)
                         || f.getName().toLowerCase().endsWith(STR_FILE_EXT_7Z)
-                        || f.getName().toLowerCase().endsWith(STR_FILE_EXT_XML)) {
-                    result = true;
-                }
-                return result;
+                        || f.getName().toLowerCase().endsWith(STR_FILE_EXT_XML);
             }
 
             @Override

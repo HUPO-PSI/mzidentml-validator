@@ -11,7 +11,6 @@ import psidev.psi.tools.ontology_manager.interfaces.OntologyAccess;
 import psidev.psi.tools.ontology_manager.interfaces.OntologyTermI;
 import psidev.psi.tools.validator.Context;
 import psidev.psi.tools.validator.MessageLevel;
-import psidev.psi.tools.validator.ValidatorException;
 import psidev.psi.tools.validator.ValidatorMessage;
 import uk.ac.ebi.jmzidml.MzIdentMLElement;
 import uk.ac.ebi.jmzidml.model.mzidml.CvParam;
@@ -69,10 +68,9 @@ public class SearchModificationRule extends AObjectRule<uk.ac.ebi.jmzidml.model.
      * Checks, if the SearchModification element contains an allowed CV term.
      * @param searchModification the SearchModification element
      * @return collection of messages
-     * @throws ValidatorException validator exception
      */
     @Override
-    public Collection<ValidatorMessage> check(SearchModification searchModification) throws ValidatorException {
+    public Collection<ValidatorMessage> check(SearchModification searchModification) {
         List<ValidatorMessage> messages = new ArrayList<>();
 
         final OntologyAccess msOntology     = ontologyManager.getOntologyAccess("MS");

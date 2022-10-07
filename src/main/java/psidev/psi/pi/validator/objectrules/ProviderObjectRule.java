@@ -12,7 +12,6 @@ import psidev.psi.tools.ontology_manager.impl.OntologyTermImpl;
 import psidev.psi.tools.ontology_manager.interfaces.OntologyAccess;
 import psidev.psi.tools.validator.Context;
 import psidev.psi.tools.validator.MessageLevel;
-import psidev.psi.tools.validator.ValidatorException;
 import psidev.psi.tools.validator.ValidatorMessage;
 import uk.ac.ebi.jmzidml.MzIdentMLElement;
 import uk.ac.ebi.jmzidml.model.mzidml.Affiliation;
@@ -82,10 +81,9 @@ public class ProviderObjectRule extends AObjectRule<Provider> {
      * 
      * @param provider the Provider element
      * @return collection of messages
-     * @throws ValidatorException validator exception
      */
     @Override
-    public Collection<ValidatorMessage> check(Provider provider) throws ValidatorException {
+    public Collection<ValidatorMessage> check(Provider provider) {
         List<ValidatorMessage> messages = new ArrayList<>();
         StringBuilder messageString = new StringBuilder();
         
@@ -144,7 +142,6 @@ public class ProviderObjectRule extends AObjectRule<Provider> {
 
     /**
      * 
-     * @param contactRole
      * @return boolean
      */
     private boolean checkPerson(ContactRole contactRole) {
@@ -159,8 +156,7 @@ public class ProviderObjectRule extends AObjectRule<Provider> {
                     return true;
                 final CvParam contactNameTerm = ObjectRuleUtil.checkAccessionsInCVParams(person.getCvParam(), CONTACT_NAME_ACC);
                 if (contactNameTerm != null) {
-                    if (contactNameTerm.getValue() != null && !contactNameTerm.getValue().isEmpty())
-                        return true;
+                    return contactNameTerm.getValue() != null && !contactNameTerm.getValue().isEmpty();
                 }
             }
         }
@@ -170,7 +166,6 @@ public class ProviderObjectRule extends AObjectRule<Provider> {
 
     /**
      * 
-     * @param contactRole
      * @return boolean
      */
     private boolean checkRoleType(ContactRole contactRole) {
@@ -180,9 +175,7 @@ public class ProviderObjectRule extends AObjectRule<Provider> {
                 List<CvParam> cvParams = new ArrayList<>();
                 cvParams.add(role.getCvParam());
                 final List<CvParam> roleTypeTerms = ObjectRuleUtil.checkAccessionsInCVParams(cvParams, roleTypeAccessions);
-                if (roleTypeTerms != null && !roleTypeTerms.isEmpty()) {
-                    return true;
-                }
+                return roleTypeTerms != null && !roleTypeTerms.isEmpty();
             }
         }
         
@@ -191,7 +184,6 @@ public class ProviderObjectRule extends AObjectRule<Provider> {
 
     /**
      * 
-     * @param contactRole
      * @return boolean
      */
     private boolean hasOrganizationName(ContactRole contactRole) {
@@ -204,8 +196,7 @@ public class ProviderObjectRule extends AObjectRule<Provider> {
             
             Organization organization = contactRole.getOrganization();
             if (organization != null)
-                if (hasOrganizationName(organization))
-                    return true;
+                return hasOrganizationName(organization);
         }
         
         return false;
@@ -213,7 +204,6 @@ public class ProviderObjectRule extends AObjectRule<Provider> {
 
     /**
      * 
-     * @param person
      * @return boolean
      */
     private boolean hasOrganizationName(Person person) {
@@ -221,9 +211,7 @@ public class ProviderObjectRule extends AObjectRule<Provider> {
             return true;
         if (person.getAffiliation() != null) {
             final List<Affiliation> affiliations = person.getAffiliation();
-            if (affiliations.stream().filter((affiliation) -> (affiliation.getOrganization() != null)).anyMatch((affiliation) -> (hasOrganizationName(affiliation.getOrganization())))) {
-                return true;
-            }
+            return affiliations.stream().filter((affiliation) -> (affiliation.getOrganization() != null)).anyMatch((affiliation) -> (hasOrganizationName(affiliation.getOrganization())));
         }
         
         return false;
@@ -231,7 +219,6 @@ public class ProviderObjectRule extends AObjectRule<Provider> {
 
     /**
      * 
-     * @param organization
      * @return boolean
      */
     private boolean hasOrganizationName(Organization organization) {
@@ -250,15 +237,13 @@ public class ProviderObjectRule extends AObjectRule<Provider> {
 
     /**
      * 
-     * @param cvParams
      * @return boolean
      */
     private boolean hasOrganizationName(List<CvParam> cvParams) {
         if (cvParams != null) {
             final CvParam contactOrganizationTerm = ObjectRuleUtil.checkAccessionsInCVParams(cvParams, CONTACT_ORGANIZATION);
             if (contactOrganizationTerm != null) {
-                if (contactOrganizationTerm.getValue() != null && !contactOrganizationTerm.getValue().isEmpty())
-                    return true;
+                return contactOrganizationTerm.getValue() != null && !contactOrganizationTerm.getValue().isEmpty();
             }
         }
         
@@ -267,7 +252,6 @@ public class ProviderObjectRule extends AObjectRule<Provider> {
 
     /**
      * 
-     * @param contactRole
      * @return boolean
      */
     private boolean hasEmail(ContactRole contactRole) {
@@ -285,8 +269,7 @@ public class ProviderObjectRule extends AObjectRule<Provider> {
 
             final Organization organization = contactRole.getOrganization();
             if (organization != null) {
-                if (hasEmail(organization))
-                    return true;
+                return hasEmail(organization);
             }
         }
         
@@ -295,7 +278,6 @@ public class ProviderObjectRule extends AObjectRule<Provider> {
 
     /**
      * 
-     * @param person
      * @return boolean
      */
     private boolean hasEmail(Person person) {
@@ -303,9 +285,7 @@ public class ProviderObjectRule extends AObjectRule<Provider> {
             if (hasEmail(person.getCvParam()))
                 return true;
             if (person.getAffiliation() != null) {
-                if (person.getAffiliation().stream().filter((affiliation) -> (affiliation.getOrganization() != null)).anyMatch((affiliation) -> (hasEmail(affiliation.getOrganization())))) {
-                    return true;
-                }
+                return person.getAffiliation().stream().filter((affiliation) -> (affiliation.getOrganization() != null)).anyMatch((affiliation) -> (hasEmail(affiliation.getOrganization())));
             }
         }
 
@@ -314,7 +294,6 @@ public class ProviderObjectRule extends AObjectRule<Provider> {
 
     /**
      * 
-     * @param organization
      * @return boolean
      */
     private boolean hasEmail(Organization organization) {
@@ -323,8 +302,7 @@ public class ProviderObjectRule extends AObjectRule<Provider> {
                 return true;
             if (organization.getParent() != null) {
                 if (organization.getParent().getOrganization() != null)
-                    if (hasEmail(organization.getParent().getOrganization()))
-                        return true;
+                    return hasEmail(organization.getParent().getOrganization());
             }
         }
 
@@ -333,7 +311,6 @@ public class ProviderObjectRule extends AObjectRule<Provider> {
 
     /**
      * 
-     * @param cvParam
      * @return boolean
      */
     private boolean hasEmail(List<CvParam> cvParam) {
