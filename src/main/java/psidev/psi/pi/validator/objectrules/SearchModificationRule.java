@@ -94,8 +94,12 @@ public class SearchModificationRule extends AObjectRule<uk.ac.ebi.jmzidml.model.
                 accession.equals("MS:1002510")) {   // cross-link acceptor
                 return new ArrayList<>();
             }
-            
-            Set<OntologyTermI> allParents = msOntology.getAllParents(new OntologyTermImpl(accession));
+            Set<OntologyTermI> allParents = null;
+            try{
+                allParents  = msOntology.getAllParents(new OntologyTermImpl(accession));
+            }catch (Exception e){
+                LOGGER.error(String.format("Accession --- %s not in MS Ontology", accession));
+            }
             if (allParents != null) {
                 for (OntologyTermI ontologyTermI : allParents) {
                     String acc = ontologyTermI.getTermAccession();
@@ -106,14 +110,24 @@ public class SearchModificationRule extends AObjectRule<uk.ac.ebi.jmzidml.model.
             }
             
             // check in MOD ontology
-            Object term = modOntology.getTermForAccession(cvParam.getAccession());
+            Object term = null;
+            try{
+                term = modOntology.getTermForAccession(cvParam.getAccession());
+            }catch (Exception e){
+                LOGGER.error(String.format("Accession --- %s not in MS Ontology", accession));
+            }
+
             if (term == null) {
                 // check in UNIMOD ontology
                 term = unimodOntology.getTermForAccession(cvParam.getAccession());
                 // check in XLMOD ontology
                 if (term == null) {
                     if (xlmodOntology != null) { // preliminary hack until XLMOD.obo is correctly indexed by OBOFoundry and OLS
-                        term = xlmodOntology.getTermForAccession(cvParam.getAccession());
+                        try{
+                            term = xlmodOntology.getTermForAccession(cvParam.getAccession());
+                        }catch (Exception e){
+                            LOGGER.error(String.format("Accession --- %s not in xlmod Ontology", accession));
+                        }
                     }
                 }
             }

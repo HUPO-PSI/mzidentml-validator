@@ -11,6 +11,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -665,6 +667,8 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
         catch (JAXBException | IllegalArgumentException | FileNotFoundException e) {
             e.printStackTrace(System.err);
             // no filter rules
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
         // Call the SwingWorker that will start the validation.
@@ -789,17 +793,18 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
      * @return InputStream for the ontologies file
      * @throws FileNotFoundException
      */
-    private InputStream getOntologiesFileInputStream(String ontologyPropertyName) throws FileNotFoundException {
+    private InputStream getOntologiesFileInputStream(String ontologyPropertyName) throws IOException {
         String ontologiesFile = MzIdentMLValidatorGUI.STR_RESOURCE_FOLDER + MzIdentMLValidatorGUI.getProperty(ontologyPropertyName);
         File file = new File(ontologiesFile);
 
         // check if the file exists. If not, return the path
         if (!file.exists()) {
             MzIdentMLValidatorGUI.LOGGER.debug("ontologiesFile does not exist: " + ontologiesFile);
-            return this.cl.getResourceAsStream(ontologiesFile);
+            String filePath = Thread.currentThread().getContextClassLoader().getResource("ontologies.xml").getPath();
+            return Files.newInputStream(Paths.get(filePath));
         }
 
-        return new FileInputStream(file);
+        return Files.newInputStream(file.toPath());
     }
 
     /**
@@ -830,17 +835,17 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
      * @return InputStream for the rule filter filer
      * @throws FileNotFoundException
      */
-    private InputStream getSemanticValidationRuleFilterInputStream() throws FileNotFoundException {
+    private InputStream getSemanticValidationRuleFilterInputStream() throws IOException {
         String ruleFilterFileName = MzIdentMLValidatorGUI.STR_RESOURCE_FOLDER +  MzIdentMLValidatorGUI.getProperty("semantic.filter.rule.file");
         File file = new File(ruleFilterFileName);
 
         // check if the file exists. If not, return the path
         if (!file.exists()) {
             MzIdentMLValidatorGUI.LOGGER.debug("ruleFilterFileName does not exist: " + ruleFilterFileName);
-            return this.cl.getResourceAsStream(ruleFilterFileName);
+            String filePath = Thread.currentThread().getContextClassLoader().getResource("ruleFilter_semantic.xml").getPath();
+            return Files.newInputStream(Paths.get(filePath));
         }
-
-        return new FileInputStream(file);
+        return Files.newInputStream(file.toPath());
     }
 
     /**
@@ -1662,7 +1667,7 @@ public class MzIdentMLValidatorGUI extends javax.swing.JPanel implements RuleFil
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             }
             else {
-                UIManager.createLookAndFeel(MzIdentMLValidatorGUI.STR_LAF_WINDOWS);                
+                UIManager.setLookAndFeel(MzIdentMLValidatorGUI.STR_LAF_WINDOWS);
             }
         }
         catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException | IllegalAccessException exc) {

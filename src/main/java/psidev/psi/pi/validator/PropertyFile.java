@@ -1,5 +1,6 @@
 package psidev.psi.pi.validator;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -30,6 +31,9 @@ public class PropertyFile {
     public Properties loadProperties(String filepath) {
         if (this.props == null) {
             this.props = new Properties();
+        }
+        if(!(new File(filepath).exists())){
+            filepath = Thread.currentThread().getContextClassLoader().getResource("validation.properties").getPath();
         }
 
         try {
