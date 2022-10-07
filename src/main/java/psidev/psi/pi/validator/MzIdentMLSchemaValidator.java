@@ -1,10 +1,6 @@
 package psidev.psi.pi.validator;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 
@@ -12,7 +8,9 @@ import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.Source;
 import javax.xml.transform.stax.StAXSource;
+import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
@@ -197,5 +195,10 @@ public class MzIdentMLSchemaValidator {
         String out = DOUBLE_NEW_LINE + "Usage: java " + MzIdentMLSchemaValidator.class.getName() +
                 " <schema_file> <inputfolder> ";
         System.out.println(out);
+    }
+
+    public void parseSchema(InputStream defaultStream) throws SAXException {
+        Source source = new StreamSource(defaultStream);
+        this.schema = SCHEMA_FACTORY.newSchema(source);
     }
 }

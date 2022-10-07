@@ -4,6 +4,8 @@
 
 mzidentml validator ui and command line tool allows developers of the mzIdentML standard to validate their implementation using the following tools.
 
+The latest version of the tool can be also found in the following folder: **bin/**
+
 Disclaimer
 ----------
 This validator is not part of the formal document process and is still under development.
@@ -27,18 +29,37 @@ When the validation finished a report like this is created:
 The commandline tool enables to validate the mzidentml using the commandline. When the tool get executed the following message defines the parameters needed by the tool: 
 
 ```bash 
-java -jar mzidentml-validator-{version}-cmd.jar
-Usage:
+java -jar mzidentml-validator-1.4.35-SNAPSHOT-cmd.jar
 
-psidev.psi.pi.validator.MzIdentMLValidator <ontology_config_file> <cv_mapping_config_file> <coded_rules_config_file> <xml_file_filter_file> <mzml_file_to_validate> <message_level>
-Where message level can be:
-- DEBUG
-- INFO
-- WARN
-- ERROR
-- FATAL
+usage: mzidentml-validator [-e] -f <arg> [-l <arg>] [-m <arg>] [-o <arg>]
+       [-r <arg>] [-s] [-t <arg>] [-w <arg>] [-x <arg>]
+mzidentml-validator version 1.4.35
+
+ -e,--full_validation
+ -f,--mzidentml_file_to_validate <arg>   mzidentml file to be validated
+ -l,--error_level <arg>                  The error level of the validation
+                                         process
+ -m,--cv_mapping_config_file <arg>       The CV mapping configuration file
+ -o,--ontology_config_file <arg>         Ontology configuration file
+ -r,--coded_rules_config_file <arg>      Coded rules configuration file
+ -s,--semantic_validation
+ -t,--xml_file_filter_file <arg>         The filter definition file
+ -w,--schema_file <arg>
+ -x,--schema_version <arg>               Schema version, supported values
+                                         1.1.0, 1.1.1, 1.2.0
 
 ```
+### schema validation
+
+```bash
+java -jar mzidentml-validator-1.4.35-SNAPSHOT-cmd.jar -s -x 1.1.0 -f file.mzid
+```
+
+-f (`--mzidentml_file_to_validate`): The file input is defined by the parameter **-f** which is the mzIdentML to be validated. 
+-x (`--schema_version`): The schema version that will be used to validate the mzidentml file. Currently, te validator supports versions `1.1.0`, `1.1.1`, `1.2.0`. 
+
+These options are mutually exclusive, if the `-x` option is provided the tool uses one of the mzIdentML default schemas in the following repo (https://github.com/HUPO-PSI/mzIdentML/tree/master/schema).  
+
 
 The following files are needed fot the tool: 
 - ontology_config_file: It can be found the default configuration file here https://raw.githubusercontent.com/ypriverol/mzidentml-validator/main/src/main/resources/ontologies.xml

@@ -14,6 +14,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 import javax.xml.bind.JAXBException;
+
+import org.apache.commons.cli.*;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -1660,60 +1662,199 @@ public class MzIdentMLValidator extends Validator {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        if (args == null || args.length != 6) {
-            printUsage();
-        }
-        
-        // Validate existence of input files.
-        File ontology = checkFileExistence(args[0], "ontology config");
-        File cvMapping = checkFileExistence(args[1], "CV mapping config");
-        File objectRules = checkFileExistence(args[2], "object rules config");
-        File ruleFilterXMLFile = checkFileExistence(args[3], "rule filter");
-        File mzIdML = checkFileExistence(args[4], "mzIdentML");
 
-        // Validate messagelevel.
-        MessageLevel msgLevel = getMessageLevel(args[5]);
-        if (msgLevel == null) {
-            System.err.println(DOUBLE_NEW_LINE + " *** Unknown message level '" + args[5] + "' ***" + NEW_LINE);
-            System.err.println(TAB + "Try one of the following:");
-            System.err.println(DOUBLE_TAB +" - DEBUG");
-            System.err.println(DOUBLE_TAB +" - INFO");
-            System.err.println(DOUBLE_TAB +" - WARN");
-            System.err.println(DOUBLE_TAB +" - ERROR");
-            System.err.println(DOUBLE_TAB +" - FATAL");
-            System.err.println(" !!! Defaulting to 'INFO' !!!" + DOUBLE_NEW_LINE);
-            msgLevel = MessageLevel.INFO;
-        }
 
-        // OK, all validated. Let's get going!
-        Collection<ValidatorMessage> messages = new ArrayList<>();
-        MzIdentMLValidator validator;
+        Options options = createValidatorOptions();
 
+        String header = "mzidentml-validator version 1.4.35\n\n";
+        String footer = "\nPlease report issues at https://github.com/ypriverol/mzidentml-validator/issues";
+
+        HelpFormatter formatter = new HelpFormatter();
+        BufferedReader br = null;
+
+
+        CommandLineParser parser = new DefaultParser();
         try {
-            InputStream ontInput = new FileInputStream(ontology);
-            
-            RuleFilterManager ruleFilterManager = new RuleFilterManager(new FileInputStream(ruleFilterXMLFile));
+            CommandLine cmd = parser.parse( options, args);
+            if(!cmd.hasOption("s") && !cmd.hasOption("e") || (!cmd.hasOption("f")))
+                formatter.printHelp("mzidentml-validator", header, options, footer, true);
 
-            validator = new MzIdentMLValidator(ontInput, new FileInputStream(cvMapping), new FileInputStream(objectRules), null);
-            validator.setMessageReportLevel(msgLevel);
-            validator.setRuleFilterManager(ruleFilterManager);
+            if(cmd.hasOption("s")){
+                MzIdentMLSchemaValidator validator = new MzIdentMLSchemaValidator();
 
-            Collection<ValidatorMessage> msgs = validator.startValidation(mzIdML);
-            if (msgs != null) {
-                messages.addAll(msgs);
+                File schemaFile = null;
+                InputStream defaultStream = null;
+                if(cmd.hasOption("w")){
+                    schemaFile = new File(cmd.getOptionValue("w"));
+                    if (!schemaFile.getName().toLowerCase().endsWith(".xsd")) {
+                        System.err.println("Warning: your schema file does not carry the extension '.xsd'!");
+                        throw new IOException("your schema file does not carry the extension '.xsd'");
+                    }
+                } else if (cmd.hasOption("x")) {
+                    String version = cmd.getOptionValue("x");
+                    if(!Objects.equals(version, "1.1.0") && !Objects.equals(version, "1.1.1") && !Objects.equals(version, "1.2.0")){
+                        System.err.println("Error, if schema file is not provided, a version of the schema must be provided: 1.1.0, 1.1.1 or 1.2.0");
+                        throw new IOException("Error, if schema file is not provided, a version of the schema must be provided: 1.1.0, 1.1.1 or 1.2.0");
+                    }
+                    String fileSchemaName = String.format("mzIdentML%s.xsd", version);
+                    defaultStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(fileSchemaName);
+                }else {
+                    System.err.println("Error, if schema file is not provided, a version of the schema must be provided: 1.1.0, 1.1.1 or 1.2.0");
+                    throw new IOException("Error, if schema file is not provided, a version of the schema must be provided: 1.1.0, 1.1.1 or 1.2.0");
+                }
 
-                System.out.println(validator.getValidatorMessages(messages));
-                System.out.println(NEW_LINE);
-                System.out.println(validator.getStatisticsReport(messages.size()));
-                System.out.println(NEW_LINE);
-                System.out.println(validator.getCvContextReport());
-                System.out.println(DOUBLE_NEW_LINE + "All done. Goodbye.");
+                // Set the schema.
+                if(defaultStream == null && schemaFile == null){
+                    System.err.println("Error, if schema file is not provided, a version of the schema must be provided: 1.1.0, 1.1.1 or 1.2.0");
+                    throw new IOException("Error, if schema file is not provided, a version of the schema must be provided: 1.1.0, 1.1.1 or 1.2.0");
+                }
+                if(schemaFile != null)
+                    validator.setSchema(schemaFile.toURI());
+                else
+                    validator.parseSchema(defaultStream);
+
+                File inputFile = new File(cmd.getOptionValue("f"));
+                System.out.println("Validating File -- ");
+                System.out.println(TRIPLE_NEW_LINE + "  - Validating file '" + inputFile.getAbsolutePath() + "'...");
+                br = new BufferedReader(new FileReader(inputFile));
+                MzIdentMLValidationErrorHandler xveh = validator.validateReader(br);
+                if (xveh.noErrors()) {
+                    System.out.println("File is valid!");
+                }else {
+                    System.out.println("* Errors detected: ");
+                    xveh.getErrorsAsValidatorMessages().forEach((vMsg) -> System.out.println(vMsg.getMessage()));
+                }
+                br.close();
+                System.out.println(NEW_LINE + "All done!" + NEW_LINE);
+            } else if(cmd.hasOption("e")){
+                // Validate existence of input files.
+                File ontology = checkFileExistence(args[0], "ontology config");
+                File cvMapping = checkFileExistence(args[1], "CV mapping config");
+                File objectRules = checkFileExistence(args[2], "object rules config");
+                File ruleFilterXMLFile = checkFileExistence(args[3], "rule filter");
+                File mzIdML = checkFileExistence(args[4], "mzIdentML");
+
+                // Validate messagelevel.
+                MessageLevel msgLevel = getMessageLevel(args[5]);
+                if (msgLevel == null) {
+                    System.err.println(DOUBLE_NEW_LINE + " *** Unknown message level '" + args[5] + "' ***" + NEW_LINE);
+                    System.err.println(TAB + "Try one of the following:");
+                    System.err.println(DOUBLE_TAB +" - DEBUG");
+                    System.err.println(DOUBLE_TAB +" - INFO");
+                    System.err.println(DOUBLE_TAB +" - WARN");
+                    System.err.println(DOUBLE_TAB +" - ERROR");
+                    System.err.println(DOUBLE_TAB +" - FATAL");
+                    System.err.println(" !!! Defaulting to 'INFO' !!!" + DOUBLE_NEW_LINE);
+                    msgLevel = MessageLevel.INFO;
+                }
+
+                // OK, all validated. Let's get going!
+                Collection<ValidatorMessage> messages = new ArrayList<>();
+                MzIdentMLValidator validator;
+
+                InputStream ontInput = new FileInputStream(ontology);
+
+                RuleFilterManager ruleFilterManager = new RuleFilterManager(new FileInputStream(ruleFilterXMLFile));
+
+                validator = new MzIdentMLValidator(ontInput, new FileInputStream(cvMapping), new FileInputStream(objectRules), null);
+                validator.setMessageReportLevel(msgLevel);
+                validator.setRuleFilterManager(ruleFilterManager);
+
+                Collection<ValidatorMessage> msgs = validator.startValidation(mzIdML);
+                if (msgs != null) {
+                    messages.addAll(msgs);
+
+                    System.out.println(validator.getValidatorMessages(messages));
+                    System.out.println(NEW_LINE);
+                    System.out.println(validator.getStatisticsReport(messages.size()));
+                    System.out.println(NEW_LINE);
+                    System.out.println(validator.getCvContextReport());
+                    System.out.println(DOUBLE_NEW_LINE + "All done. Goodbye.");
+                }
+            }
+        } catch (FileNotFoundException | JAXBException | OntologyLoaderException | ParseException e) {
+            formatter.printHelp("mzidentml-validator", header, options, footer, true);
+            e.printStackTrace(System.err);
+        } catch (IOException | SAXException e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                if (br != null) {
+                    br.close();
+                }
+            }
+            catch (IOException ioe) {
+                // Do nothing.
             }
         }
-        catch (FileNotFoundException | JAXBException | OntologyLoaderException e) {
-            System.err.println(DOUBLE_NEW_LINE + "Exception occurred: " + e.getMessage());
-            e.printStackTrace(System.err);
-        }
+    }
+
+    private static Options createValidatorOptions() {
+        Options options = new Options();
+
+        options.addOption(Option.builder()
+                        .hasArg(false)
+                        .option("s")
+                        .longOpt("semantic_validation")
+                .build());
+
+        options.addOption(Option.builder()
+                        .option("x")
+                        .longOpt("schema_version")
+                        .hasArg(true)
+                        .desc("Schema version, supported values 1.1.0, 1.1.1, 1.2.0")
+                .build());
+        options.addOption(Option.builder()
+                        .option("w")
+                        .longOpt("schema_file")
+                        .hasArg(true)
+                .build());
+
+        options.addOption(Option.builder()
+                .hasArg(false)
+                .option("e")
+                .longOpt("full_validation")
+                .build());
+
+        options.addOption(Option.builder()
+                        .hasArg(true)
+                        .option("o")
+                        .longOpt("ontology_config_file")
+                        .desc("Ontology configuration file")
+                .build());
+
+        options.addOption(Option.builder()
+                        .option("m")
+                        .longOpt("cv_mapping_config_file")
+                        .hasArg(true)
+                        .desc("The CV mapping configuration file")
+                .build());
+        options.addOption(Option.builder()
+                        .hasArg(true)
+                        .option("r")
+                        .longOpt("coded_rules_config_file")
+                        .desc("Coded rules configuration file")
+                .build());
+        options.addOption(Option.builder()
+                        .option("t")
+                        .longOpt("xml_file_filter_file")
+                        .hasArg(true)
+                        .desc("The filter definition file")
+                .build());
+        options.addOption(Option.builder()
+                        .option("f")
+                        .required(true)
+                        .longOpt("mzidentml_file_to_validate")
+                        .desc("mzidentml file to be validated")
+                        .hasArg(true)
+                .build());
+        options.addOption(Option.builder()
+                        .option("l")
+                        .longOpt("error_level")
+                        .desc("The error level of the validation process")
+                        .hasArg(true)
+                .build());
+        return options;
     }
 
     /**
