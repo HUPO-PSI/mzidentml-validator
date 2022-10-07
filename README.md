@@ -18,6 +18,10 @@ The GUI version is a desktop tool that enable users to configure among others th
 jar -jar mzidentml-validator-{version}-gui.jar 
 ```
 
+When the validation finished a report like this is created: 
+
+![Final report created by the validator](https://github.com/ypriverol/mzidentml-validator/raw/main/docs/screen-report-gui.png)
+
 ## mzidentml-validator-{version}-cmd.jar 
 
 The commandline tool enables to validate the mzidentml using the commandline. When the tool get executed the following message defines the parameters needed by the tool: 
