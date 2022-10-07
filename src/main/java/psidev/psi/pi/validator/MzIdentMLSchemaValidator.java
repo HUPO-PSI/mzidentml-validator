@@ -109,93 +109,86 @@ public class MzIdentMLSchemaValidator {
         return this.validateAgainstSchema(reader, this.schema);
     }
 
-    /**
-     * Main program for XML schema validation.
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        MzIdentMLSchemaValidator validator = new MzIdentMLSchemaValidator();
+//    /**
+//     * Main program for XML schema validation.
+//     * @param args the command line arguments
+//     */
+//    public static void main(String[] args) {
+//        MzIdentMLSchemaValidator validator = new MzIdentMLSchemaValidator();
+//
+//        if (args == null || args.length != 2) {
+//            printUsage();
+//            System.exit(EXIT_FAILURE);
+//        }
+//
+//        // Check schema file.
+//        File schemaFile = new File(args[0]);
+//        if (!schemaFile.exists()) {
+//            System.err.println(NEW_LINE + "Unable to find the schema file you specified: '" + args[0] + "'!" + NEW_LINE);
+//            System.exit(EXIT_FAILURE);
+//        }
+//
+//        if (schemaFile.isDirectory()) {
+//            System.err.println(NEW_LINE + "The schema file you specified ('" + args[0] + "') was a folder, not a file!" + NEW_LINE);
+//            System.exit(EXIT_FAILURE);
+//        }
+//
+//        if (!schemaFile.getName().toLowerCase().endsWith(".xsd")) {
+//            System.err.println("Warning: your schema file does not carry the extension '.xsd'!");
+//        }
+//
+//        // Check input folder.
+//        File inputFolder = new File(args[1]);
+//        if (!inputFolder.exists()) {
+//            System.out.println(NEW_LINE + "Unable to find the input folder you specified: '" + args[1] + "'!" + NEW_LINE);
+//            System.exit(EXIT_FAILURE);
+//        }
+//        if (!inputFolder.isDirectory()) {
+//            System.out.println(NEW_LINE + "The input folder you specified ('" + args[1] + "') was a file, not a folder!" + NEW_LINE);
+//            System.exit(EXIT_FAILURE);
+//        }
+//
+//        BufferedReader br = null;
+//        try {
+//            // Set the schema.
+//            validator.setSchema(schemaFile.toURI());
+//            System.out.println(NEW_LINE + "Retrieving files from '" + inputFolder.getAbsolutePath() + "'...");
+//            File[] inputFiles = inputFolder.listFiles((File dir, String name) -> name.toLowerCase().endsWith(STR_FILE_EXT_MZID) || name.toLowerCase().endsWith(STR_FILE_EXT_XML));
+//
+//            System.out.println("Found " + inputFiles.length + " input files." + NEW_LINE);
+//            System.out.println("Validating files...");
+//            for (File inputFile : inputFiles) {
+//                System.out.println(TRIPLE_NEW_LINE + "  - Validating file '" + inputFile.getAbsolutePath() + "'...");
+//                br = new BufferedReader(new FileReader(inputFile));
+//                MzIdentMLValidationErrorHandler xveh = validator.validateReader(br);
+//                if (xveh.noErrors()) {
+//                    System.out.println(MzIdentMLSchemaValidator.STR4_INDENTATION + "File is valid!");
+//                }
+//                else {
+//                    System.out.println(MzIdentMLSchemaValidator.STR4_INDENTATION + "* Errors detected: ");
+//                    xveh.getErrorsAsValidatorMessages().forEach((vMsg) -> System.out.println(vMsg.getMessage()));
+//                }
+//                br.close();
+//            }
+//
+//            System.out.println(NEW_LINE + "All done!" + NEW_LINE);
+//        }
+//        catch (SAXException | IOException e) {
+//            e.printStackTrace(System.err);
+//        }
+//        finally {
+//            try {
+//                if (br != null) {
+//                    br.close();
+//                }
+//            }
+//            catch (IOException ioe) {
+//                // Do nothing.
+//            }
+//        }
+//    }
 
-        if (args == null || args.length != 2) {
-            printUsage();
-            System.exit(EXIT_FAILURE);
-        }
-        
-        // Check schema file.
-        File schemaFile = new File(args[0]);
-        if (!schemaFile.exists()) {
-            System.err.println(NEW_LINE + "Unable to find the schema file you specified: '" + args[0] + "'!" + NEW_LINE);
-            System.exit(EXIT_FAILURE);
-        }
-        
-        if (schemaFile.isDirectory()) {
-            System.err.println(NEW_LINE + "The schema file you specified ('" + args[0] + "') was a folder, not a file!" + NEW_LINE);
-            System.exit(EXIT_FAILURE);
-        }
-        
-        if (!schemaFile.getName().toLowerCase().endsWith(".xsd")) {
-            System.err.println("Warning: your schema file does not carry the extension '.xsd'!");
-        }
 
-        // Check input folder.
-        File inputFolder = new File(args[1]);
-        if (!inputFolder.exists()) {
-            System.out.println(NEW_LINE + "Unable to find the input folder you specified: '" + args[1] + "'!" + NEW_LINE);
-            System.exit(EXIT_FAILURE);
-        }
-        if (!inputFolder.isDirectory()) {
-            System.out.println(NEW_LINE + "The input folder you specified ('" + args[1] + "') was a file, not a folder!" + NEW_LINE);
-            System.exit(EXIT_FAILURE);
-        }
-
-        BufferedReader br = null;
-        try {
-            // Set the schema.
-            validator.setSchema(schemaFile.toURI());
-            System.out.println(NEW_LINE + "Retrieving files from '" + inputFolder.getAbsolutePath() + "'...");
-            File[] inputFiles = inputFolder.listFiles((File dir, String name) -> name.toLowerCase().endsWith(STR_FILE_EXT_MZID) || name.toLowerCase().endsWith(STR_FILE_EXT_XML));
-            
-            System.out.println("Found " + inputFiles.length + " input files." + NEW_LINE);
-            System.out.println("Validating files...");
-            for (File inputFile : inputFiles) {
-                System.out.println(TRIPLE_NEW_LINE + "  - Validating file '" + inputFile.getAbsolutePath() + "'...");
-                br = new BufferedReader(new FileReader(inputFile));
-                MzIdentMLValidationErrorHandler xveh = validator.validateReader(br);
-                if (xveh.noErrors()) {
-                    System.out.println(MzIdentMLSchemaValidator.STR4_INDENTATION + "File is valid!");
-                }
-                else {
-                    System.out.println(MzIdentMLSchemaValidator.STR4_INDENTATION + "* Errors detected: ");
-                    xveh.getErrorsAsValidatorMessages().forEach((vMsg) -> System.out.println(vMsg.getMessage()));
-                }
-                br.close();
-            }
-            
-            System.out.println(NEW_LINE + "All done!" + NEW_LINE);
-        }
-        catch (SAXException | IOException e) {
-            e.printStackTrace(System.err);
-        }
-        finally {
-            try {
-                if (br != null) {
-                    br.close();
-                }
-            }
-            catch (IOException ioe) {
-                // Do nothing.
-            }
-        }
-    }
-
-    /**
-     * Prints a usage message.
-     */
-    private static void printUsage() {
-        String out = DOUBLE_NEW_LINE + "Usage: java " + MzIdentMLSchemaValidator.class.getName() +
-                " <schema_file> <inputfolder> ";
-        System.out.println(out);
-    }
 
     public void parseSchema(InputStream defaultStream) throws SAXException {
         Source source = new StreamSource(defaultStream);
