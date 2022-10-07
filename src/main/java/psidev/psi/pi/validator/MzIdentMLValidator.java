@@ -121,17 +121,18 @@ public class MzIdentMLValidator extends Validator {
 
         this.gui = mzIdentMLValidatorGUI;
         this.checkOntologyAccess();
-
-        try {
-            aCvMappingFile.close();
-            aCodedRuleFile.close();
+        if (mzIdentMLValidatorGUI != null){
+            try {
+                aCvMappingFile.close();
+                aCodedRuleFile.close();
+            }
+            catch (IOException e1) {
+                e1.printStackTrace(System.err);
+            }
         }
-        catch (IOException e1) {
-            e1.printStackTrace(System.err);
-        }
-
         this.setObjectAndMappingRules(aCvMappingFile, aCodedRuleFile);
         this.resetCountersAndGUI();
+
     }
     
     /**
@@ -847,7 +848,7 @@ public class MzIdentMLValidator extends Validator {
         this.checkElementObjectRule(MzIdentMLElement.CvParam);
         this.checkElementObjectRule(MzIdentMLElement.Param);
         
-        if (this.gui.isMIAPEValidationSelected()) {
+        if (this.gui != null && this.gui.isMIAPEValidationSelected()) {
             this.checkElementObjectRule(MzIdentMLElement.AnalysisSoftware);
             this.checkElementObjectRule(MzIdentMLElement.Provider);
         }
@@ -856,7 +857,7 @@ public class MzIdentMLValidator extends Validator {
         this.checkElementObjectRule(MzIdentMLElement.PeptideEvidence);
         this.checkElementObjectRule(MzIdentMLElement.Peptide);
         this.checkElementObjectRule(MzIdentMLElement.SearchModification);
-        if (this.gui.isMIAPEValidationSelected()) {
+        if (this.gui != null && this.gui.isMIAPEValidationSelected()) {
             this.checkElementObjectRule(MzIdentMLElement.Enzyme);
         }
         this.checkElementObjectRule(MzIdentMLElement.ProteinDetectionList);
@@ -892,8 +893,8 @@ public class MzIdentMLValidator extends Validator {
                     this.cntXLInteractionScoringMessages++;
                 }
             }
-            
-            this.gui.bHasXLErrors = this.cntXLInteractionScoringMessages > 0;
+            if(this.gui != null)
+                this.gui.bHasXLErrors = this.cntXLInteractionScoringMessages > 0;
         }
     }
     
@@ -1361,9 +1362,11 @@ public class MzIdentMLValidator extends Validator {
         this.cntXMLSchemaValidatingMessages = 0;
         this.cntUnanticipatedCVTerms = 0;
         this.cntXLInteractionScoringMessages = 0;
-        this.gui.cntDoubledUnanticipatedCVTermMessages = 0;
-        this.gui.cntFlawErrors = 0;
-        this.gui.bHasXLErrors = false;
+        if(gui != null){
+            this.gui.cntDoubledUnanticipatedCVTermMessages = 0;
+            this.gui.cntFlawErrors = 0;
+            this.gui.bHasXLErrors = false;
+        }
     }
     
     /**
@@ -1648,12 +1651,9 @@ public class MzIdentMLValidator extends Validator {
         File file = new File(fileNameArg);
         
         if (!file.exists()) {
-            printError("The " + fileType + " file you specified '" + fileNameArg + "' does not exist!");
+            System.out.println("The " + fileType + " file you specified '" + fileNameArg + "' does not exist!");
         }
-        else if (file.isDirectory()) {
-            printError("The " + fileType + " file you specified '" + fileNameArg + "' is a folder, not a file!");
-        }
-        
+
         return file;
     }
     
@@ -1726,44 +1726,66 @@ public class MzIdentMLValidator extends Validator {
                 }
                 br.close();
                 System.out.println(NEW_LINE + "All done!" + NEW_LINE);
+
             } else if(cmd.hasOption("e")){
                 // Validate existence of input files.
-                File ontology = checkFileExistence(args[0], "ontology config");
-                File cvMapping = checkFileExistence(args[1], "CV mapping config");
-                File objectRules = checkFileExistence(args[2], "object rules config");
-                File ruleFilterXMLFile = checkFileExistence(args[3], "rule filter");
-                File mzIdML = checkFileExistence(args[4], "mzIdentML");
+                File inputFile = new File(cmd.getOptionValue("f"));
 
-                // Validate messagelevel.
-                MessageLevel msgLevel = getMessageLevel(args[5]);
-                if (msgLevel == null) {
-                    System.err.println(DOUBLE_NEW_LINE + " *** Unknown message level '" + args[5] + "' ***" + NEW_LINE);
-                    System.err.println(TAB + "Try one of the following:");
-                    System.err.println(DOUBLE_TAB +" - DEBUG");
-                    System.err.println(DOUBLE_TAB +" - INFO");
-                    System.err.println(DOUBLE_TAB +" - WARN");
-                    System.err.println(DOUBLE_TAB +" - ERROR");
-                    System.err.println(DOUBLE_TAB +" - FATAL");
-                    System.err.println(" !!! Defaulting to 'INFO' !!!" + DOUBLE_NEW_LINE);
-                    msgLevel = MessageLevel.INFO;
+                InputStream ontology = null;
+                if(cmd.hasOption("o")){
+                    File ontologyFile = checkFileExistence(cmd.getOptionValue("o"), "ontology config");
+                    if(ontologyFile.exists())
+                        ontology = new FileInputStream(ontologyFile);
+                }else
+                    ontology = Thread.currentThread().getContextClassLoader().getResourceAsStream("ontologies.xml");
+
+                InputStream cvMappingStream = null;
+                if(cmd.hasOption("m")){
+                    File cvMapping = checkFileExistence(cmd.getOptionValue("m"), "CV mapping config");
+                    if(cvMapping.exists())
+                        cvMappingStream = new FileInputStream(cvMapping);
+                }else
+                    cvMappingStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("mzIdentML-mapping_1.1.0.xml");
+
+
+                InputStream objectRulesStream = null;
+                if(cmd.hasOption("r")){
+                    File cvMapping = checkFileExistence(cmd.getOptionValue("r"), "object rules config");
+                    if(cvMapping.exists())
+                        objectRulesStream = new FileInputStream(cvMapping);
+                }else
+                    objectRulesStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("ObjectRulesMIAPE.1.1.0.xml");
+
+
+
+                InputStream filterStream = null;
+                if(cmd.hasOption("t")){
+                    File cvMapping = checkFileExistence(cmd.getOptionValue("t"), "rule filter");
+                    if(cvMapping.exists())
+                        filterStream = new FileInputStream(cvMapping);
+                }else
+                    filterStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("ruleFilter_MIAPEMSI.xml");
+
+
+                // Validate message level.
+                MessageLevel msgLevel = MessageLevel.INFO;
+                if (cmd.hasOption("l")) {
+                    msgLevel = getMessageLevel(cmd.getOptionValue("l"));
                 }
 
                 // OK, all validated. Let's get going!
                 Collection<ValidatorMessage> messages = new ArrayList<>();
                 MzIdentMLValidator validator;
 
-                InputStream ontInput = new FileInputStream(ontology);
+                RuleFilterManager ruleFilterManager = new RuleFilterManager(filterStream);
 
-                RuleFilterManager ruleFilterManager = new RuleFilterManager(new FileInputStream(ruleFilterXMLFile));
-
-                validator = new MzIdentMLValidator(ontInput, new FileInputStream(cvMapping), new FileInputStream(objectRules), null);
+                validator = new MzIdentMLValidator(ontology, cvMappingStream, objectRulesStream, null);
                 validator.setMessageReportLevel(msgLevel);
                 validator.setRuleFilterManager(ruleFilterManager);
 
-                Collection<ValidatorMessage> msgs = validator.startValidation(mzIdML);
+                Collection<ValidatorMessage> msgs = validator.startValidation(inputFile);
                 if (msgs != null) {
                     messages.addAll(msgs);
-
                     System.out.println(validator.getValidatorMessages(messages));
                     System.out.println(NEW_LINE);
                     System.out.println(validator.getStatisticsReport(messages.size()));
