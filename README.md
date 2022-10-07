@@ -60,12 +60,19 @@ java -jar mzidentml-validator-1.4.35-SNAPSHOT-cmd.jar -s -x 1.1.0 -f file.mzid
 
 These options are mutually exclusive, if the `-x` option is provided the tool uses one of the mzIdentML default schemas in the following repo (https://github.com/HUPO-PSI/mzIdentML/tree/master/schema).  
 
+### semantic (full) validation 
+
+```bash
+java -jar mzidentml-validator-1.4.35-SNAPSHOT-cmd.jar -e -f file.mzid
+```
+
+-e (`--full_validation`): perform semantic and schema validation. 
 
 The following files are needed fot the tool: 
-- ontology_config_file: It can be found the default configuration file here https://raw.githubusercontent.com/ypriverol/mzidentml-validator/main/src/main/resources/ontologies.xml
-- cv_mapping_config_file: It can be found the default configuration file here ... 
-- coded_rules_config_file: It can be found the default configuration file here ... 
-- xml_file_filter_file: It can be found the default configuration file here ... 
+- ontology_config_file: An example can be found the default configuration file here https://raw.githubusercontent.com/ypriverol/mzidentml-validator/main/src/main/resources/ontologies.xml
+- cv_mapping_config_file: An example can be found the default configuration file here https://raw.githubusercontent.com/ypriverol/mzidentml-validator/main/src/main/resources/mzIdentML-mapping_1.1.0.xml
+- coded_rules_config_file: An example can be found the default configuration file here https://raw.githubusercontent.com/ypriverol/mzidentml-validator/main/src/main/resources/ObjectRulesMIAPE.1.1.0.xml
+- xml_file_filter_file: An example can be found the default configuration file here https://raw.githubusercontent.com/ypriverol/mzidentml-validator/main/src/main/resources/ruleFilter_MIAPEMSI.xml
 - mzml_file_to_validate: The mzidentml that will be validated
 - message_level: One of the following values: **DEBUG, INFO, WARN, ERROR, FATAL**
 

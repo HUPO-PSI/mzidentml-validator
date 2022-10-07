@@ -623,7 +623,7 @@ public class MzIdentMLValidator extends Validator {
                 if (filteredList.size() > 0) {
                     msgText = "unanticipated terms for XPath '" + xpath + "' : " + filteredList;
                     System.out.println(msgText);
-                    if (this.gui.jCheckBoxShowUnanticipatedCVTerms.isSelected()) {
+                    if (this.gui != null && this.gui.jCheckBoxShowUnanticipatedCVTerms.isSelected()) {
                         valMsg = new ValidatorMessage(msgText, MessageLevel.WARN);
                         unrecognisedTermsForXPath.add(valMsg);
                         this.addMessages(unrecognisedTermsForXPath, MessageLevel.WARN);
@@ -1508,11 +1508,10 @@ public class MzIdentMLValidator extends Validator {
         this.addTableRow(sb, "CvMappingRule total count:", this.extendedReport.getTotalCvRules());
         this.addTableRow(sb, "CvMappingRules not run:", this.extendedReport.getNonCheckedCvRules().size());
         String cvMappingRuleColor = this.gui.getInvalidCvMappingColor();
-        int noOfInvalidCvRules = this.extendedReport.getInvalidCvRules().size() - this.gui.cntFlawErrors;
-        if (cvMappingRuleColor.equals(this.gui.COLOR_RED)) {
+        int noOfInvalidCvRules = (this.gui != null)?this.extendedReport.getInvalidCvRules().size() - this.gui.cntFlawErrors:this.extendedReport.getInvalidCvRules().size();
+        if (this.gui != null && cvMappingRuleColor.equals(this.gui.COLOR_RED)) {
             this.addPossiblyColouredRow(sb, "Invalid CvMappingRules:", noOfInvalidCvRules, cvMappingRuleColor);
-        }
-        else {
+        } else {
             this.addPossiblyColouredRow(sb, "Not matching CvMappingRules:", noOfInvalidCvRules, cvMappingRuleColor);
         }
         this.addTableRow(sb, "CvMappingRules run & valid:", this.extendedReport.getValidCvRules().size());
@@ -1523,17 +1522,16 @@ public class MzIdentMLValidator extends Validator {
         this.addTableRow(sb, "ObjectRules not run:", this.extendedReport.getObjectRulesNotChecked().size());
         String objRuleColor = this.gui.getInvalidObjectRuleColor();
         int noOfInvalidObjectRules = this.extendedReport.getObjectRulesInvalid().size();
-        if (objRuleColor.equals(this.gui.COLOR_RED)) {
+        if (this.gui != null && objRuleColor.equals(this.gui.COLOR_RED)) {
             this.addPossiblyColouredRow(sb, "ObjectRules run & invalid:", noOfInvalidObjectRules, objRuleColor);
-        }
-        else {
+        }else {
             this.addPossiblyColouredRow(sb, "ObjectRules run & not matching:", noOfInvalidObjectRules, objRuleColor);
         }
         this.addTableRow(sb, "ObjectRules run & valid:", this.extendedReport.getObjectRulesValid().size());
         this.addEmptyRow(sb);
 
         // Total number of rules
-        if (this.gui.jCheckBoxShowUnanticipatedCVTerms.isSelected()) {
+        if (this.gui != null && this.gui.jCheckBoxShowUnanticipatedCVTerms.isSelected()) {
             this.addPossiblyColouredRow(sb, "Unanticipated CV terms:", this.cntUnanticipatedCVTerms, this.gui.getUnanticipatedCVColor(this.cntUnanticipatedCVTerms));
         }
         if (AdditionalSearchParamsObjectRule.bIsCrossLinkingSearch) {
@@ -1541,9 +1539,13 @@ public class MzIdentMLValidator extends Validator {
         }
 
         messageNumber = this.getTotalNumberOfInvalidRules(noOfInvalidCvRules, noOfInvalidObjectRules);
-        this.addPossiblyColouredRow(sb, this.STR_NOT_MATCHING_MSGS_RECV, messageNumber, this.gui.getInvalidMsgColor());
-        
-        this.addConditionalTableRow(sb, "Messages not reported since they occur more than " + this.gui.jSpinner.getValue() + " times: ", this.cntMultipleClearedMessages + this.gui.cntDoubledUnanticipatedCVTermMessages, this.gui.COLOR_BLACK);
+        String invalidColor = (this.gui != null)?this.gui.getInvalidMsgColor():"red";
+        this.addPossiblyColouredRow(sb, this.STR_NOT_MATCHING_MSGS_RECV, messageNumber, invalidColor);
+
+        if(this.gui != null)
+            this.addConditionalTableRow(sb, "Messages not reported since they occur more than " + this.gui.jSpinner.getValue() + " times: ", this.cntMultipleClearedMessages + this.gui.cntDoubledUnanticipatedCVTermMessages, this.gui.COLOR_BLACK);
+        else
+            sb.append("Messages not reported since they occur more than");
 
         sb.append("</table></body></html>");
 
@@ -1568,9 +1570,9 @@ public class MzIdentMLValidator extends Validator {
         
         sb.append("CvMappingRule total count: ").append(this.extendedReport.getTotalCvRules()).append(NEW_LINE);
         sb.append("CvMappingRules not run: ").append(this.extendedReport.getNonCheckedCvRules().size()).append(NEW_LINE);
-        String cvMappingRuleColor = this.gui.getInvalidCvMappingColor();
-        int noOfInvalidCvRules = this.extendedReport.getInvalidCvRules().size() - this.gui.cntFlawErrors;
-        if (cvMappingRuleColor.equals(this.gui.COLOR_RED)) {
+        String cvMappingRuleColor = (this.gui != null)?this.gui.getInvalidCvMappingColor(): "red";
+        int noOfInvalidCvRules = (this.gui != null)? this.extendedReport.getInvalidCvRules().size() - this.gui.cntFlawErrors:this.extendedReport.getInvalidCvRules().size();
+        if (this.gui != null && cvMappingRuleColor.equals(this.gui.COLOR_RED)) {
             sb.append("CvMappingRules run & invalid: ").append(noOfInvalidCvRules).append(NEW_LINE);
         }
         else {
@@ -1583,9 +1585,9 @@ public class MzIdentMLValidator extends Validator {
         // Object rules
         sb.append("ObjectRules total count: ").append(this.extendedReport.getTotalObjectRules()).append(NEW_LINE);
         sb.append("ObjectRules not run: ").append(this.extendedReport.getObjectRulesNotChecked().size()).append(NEW_LINE);
-        String objRuleColor = this.gui.getInvalidObjectRuleColor();
+        String objRuleColor = (this.gui != null)? this.gui.getInvalidObjectRuleColor(): "red";
         int noOfInvalidObjectRules = this.extendedReport.getObjectRulesInvalid().size();
-        if (objRuleColor.equals(this.gui.COLOR_RED)) {
+        if (this.gui != null && objRuleColor.equals(this.gui.COLOR_RED)) {
             sb.append("ObjectRules run & invalid: ").append(noOfInvalidObjectRules).append(NEW_LINE);
         }
         else {
@@ -1594,7 +1596,7 @@ public class MzIdentMLValidator extends Validator {
         sb.append("ObjectRules run & valid: ").append(this.extendedReport.getObjectRulesValid().size()).append(NEW_LINE);
         sb.append(NEW_LINE);
         
-        if (this.gui.jCheckBoxShowUnanticipatedCVTerms.isSelected()) {
+        if (this.gui != null && this.gui.jCheckBoxShowUnanticipatedCVTerms.isSelected()) {
             sb.append("Unanticipated CV terms: ").append(this.cntUnanticipatedCVTerms).append(NEW_LINE);
         }
         if (AdditionalSearchParamsObjectRule.bIsCrossLinkingSearch) {
@@ -1605,11 +1607,12 @@ public class MzIdentMLValidator extends Validator {
         messageNumber = this.getTotalNumberOfInvalidRules(noOfInvalidCvRules, noOfInvalidObjectRules);
         sb.append(this.STR_NOT_MATCHING_MSGS_RECV).append(messageNumber);
         
-        if (this.cntMultipleClearedMessages > 0) {
+        if (this.gui != null && this.cntMultipleClearedMessages > 0) {
             sb.append(NEW_LINE);
             sb.append("Messages not reported since they occur more than ").append(this.gui.jSpinner.getValue()).append(" times: ").append(this.cntMultipleClearedMessages + this.gui.cntDoubledUnanticipatedCVTermMessages).append(NEW_LINE);
-        }
-    
+        }else
+            sb.append("Messages not reported since they occur more than ").append(this.cntMultipleClearedMessages).append(NEW_LINE);
+
         return sb.toString();
     }
 
@@ -1618,7 +1621,9 @@ public class MzIdentMLValidator extends Validator {
      * @return the total number of invalid rules
      */
     private int getTotalNumberOfInvalidRules(int invalidCVRules, int invalidObjectRules) {
-        return invalidCVRules + invalidObjectRules + this.cntUnanticipatedCVTerms + this.cntXLInteractionScoringMessages + this.extendedReport.getInvalidSchemaValidation().size() - this.gui.cntFlawErrors - (Integer) this.gui.jSpinner.getValue();
+        int flagErrors = (this.gui != null)? this.gui.cntFlawErrors: 0;
+        int spinnerCount = (this.gui != null)? (Integer) this.gui.jSpinner.getValue(): 0;
+        return invalidCVRules + invalidObjectRules + this.cntUnanticipatedCVTerms + this.cntXLInteractionScoringMessages + this.extendedReport.getInvalidSchemaValidation().size() - flagErrors - spinnerCount;
     }
     
     /**
@@ -2024,7 +2029,7 @@ public class MzIdentMLValidator extends Validator {
                 
                 if (msgID_msgLevelMap.containsKey(idLevelPair)) {
                     msgID_msgLevelMap.put(idLevelPair, msgID_msgLevelMap.get(idLevelPair) + 1);
-                    if (msgID_msgLevelMap.get(idLevelPair) < (int) this.gui.jSpinner.getValue()) {
+                    if (this.gui != null && msgID_msgLevelMap.get(idLevelPair) < (int) this.gui.jSpinner.getValue()) {
                         clearedMultipleMessages.add(msg);
                     }
                     else {
